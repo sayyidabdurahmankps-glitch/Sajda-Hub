@@ -35,7 +35,7 @@ export default function AdminLoginPage() {
       // here (e.g., checking a 'user_roles' table) before pushing them to the dashboard.
       
       // Redirect to the secure admin dashboard
-      router.push("/admin/dashboard");
+      router.push("/admin");
     } catch (err: any) {
       setErrorMsg(err.message || "Authentication failed. Access denied.");
     } finally {
