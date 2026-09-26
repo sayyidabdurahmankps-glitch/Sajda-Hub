@@ -1,0 +1,33 @@
+@import "tailwindcss";
+
+@theme {
+  /* Keep standard ocean colors if needed elsewhere */
+  --color-ocean-50: #f4f8f5;
+  --color-ocean-100: #e3ede5;
+  --color-ocean-200: #c5dbcc;
+  --color-ocean-300: #98c2a8;
+  --color-ocean-400: #6ca583;
+  --color-ocean-500: #498865;
+  --color-ocean-600: #3a6d51;
+  --color-ocean-700: #315943;
+  --color-ocean-800: #365c49;
+  --color-ocean-900: #2d4d3d;
+  --color-ocean-950: #21382c;
+
+  /* Dedicated Sage theme for your exact screenshot green */
+  --color-sage-950: #365c49; 
+
+  /* Ink Palette (Text) */
+  --color-ink-500: #64748B;
+  --color-ink-600: #475569;
+  --color-ink-900: #0F172A;
+  --color-ink-950: #0B1726;
+
+  --color-line: #E2E8F0;
+  --color-line-strong: #CBD5E1;
+}
+
+body {
+  background-color: #F8FAFC;
+  color: var(--color-ink-950);
+}
