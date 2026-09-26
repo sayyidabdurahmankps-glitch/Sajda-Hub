@@ -24,7 +24,7 @@ export default function Footer() {
               {/* Added your logo here, keeping the nice hover scale effect! */}
               <div className="relative flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl shadow-ocean-sm transition-transform group-hover:scale-105">
                 <Image
-                  src="/icon.svg"
+                  src="/sajda-logo.png"
                   alt="SAJDA Hub Logo"
                   fill
                   className="object-contain"
@@ -64,12 +64,6 @@ export default function Footer() {
 
               <div className="flex flex-col gap-4 text-sm font-bold text-ink-600">
                 <Link
-                  href="/unions"
-                  className="transition hover:translate-x-1 hover:text-ocean-700"
-                >
-                  Unions
-                </Link>
-                <Link
                   href="/programs"
                   className="transition hover:translate-x-1 hover:text-ocean-700"
                 >
@@ -80,27 +74,6 @@ export default function Footer() {
                   className="transition hover:translate-x-1 hover:text-ocean-700"
                 >
                   Leaderboard
-                </Link>
-              </div>
-            </div>
-
-            <div>
-              <p className="mb-6 text-[11px] font-extrabold uppercase tracking-[0.2em] text-ink-400">
-                Portal
-              </p>
-
-              <div className="flex flex-col gap-4 text-sm font-bold text-ink-600">
-                <Link
-                  href="/register"
-                  className="transition hover:translate-x-1 hover:text-ocean-700"
-                >
-                  Register Union
-                </Link>
-                <Link
-                  href="/login"
-                  className="transition hover:translate-x-1 hover:text-ocean-700"
-                >
-                  Executive Login
                 </Link>
               </div>
             </div>
