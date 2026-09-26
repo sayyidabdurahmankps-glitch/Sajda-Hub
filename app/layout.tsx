@@ -36,6 +36,7 @@ export const metadata: Metadata = {
     icon: "/icon.svg",
     apple: "/icon.svg",
   },
+  
 };
 
 export default function RootLayout({
