@@ -48,10 +48,19 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="bg-[#F8FAFC] text-ink-950 antialiased selection:bg-ocean-500/30 selection:text-ocean-900">
-        {/* The Navbar now renders globally across the entire app */}
+      {/* 
+        Added min-h-screen and flex-col so the footer always 
+        pushes cleanly to the bottom of the page.
+      */}
+      <body className="flex min-h-screen flex-col bg-[#F8FAFC] text-ink-950 antialiased selection:bg-ocean-500/30 selection:text-ocean-900">
         <Navbar />
-        {children}
+        
+        {/* Main content wrapper */}
+        <div className="flex-grow">
+          {children}
+        </div>
+
+        <Footer />
       </body>
     </html>
   );
