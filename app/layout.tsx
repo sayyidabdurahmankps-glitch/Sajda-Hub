@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 // Adjust this import path if your Navbar is in a different folder
 import Navbar from "@/components/Navbar"; 
+import Footer from "@/components/Footer";
 
 const SITE_URL = "https://sajda-union.vercel.app";
 
@@ -13,7 +14,7 @@ export const metadata: Metadata = {
   },
   description:
     "The official digital platform for Jamia Nooriyya Junior College Unions — committees, programs, four union wings and live union metrics.",
-  applicationName: "SAJDA Hub",
+  applicationName: "SAJDA Union",
   keywords: [
     "SAJDA Union",
     "Jamia Nooriyya",
@@ -33,8 +34,8 @@ export const metadata: Metadata = {
     follow: true,
   },
   icons: {
-    icon: "/icon.svg",
-    apple: "/icon.svg",
+    icon: "/favicon.png",
+    apple: "/favicon.png",
   },
   // Added Google Search Console Verification here!
   verification: {
