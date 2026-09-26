@@ -74,7 +74,7 @@ export default function LaunchPage() {
       <div className={`mt-16 flex animate-in fade-in slide-in-from-top-8 duration-1000 flex-col items-center gap-6 transition-all duration-1000 ${step > 0 ? "opacity-30 blur-[2px]" : "opacity-100"}`}>
         <div className="relative flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md shadow-2xl">
           <Image 
-            src="/icon.png" 
+            src="/sajda-logo.png" 
             alt="SAJDA Logo" 
             fill
             className="object-contain p-3 opacity-90" 
