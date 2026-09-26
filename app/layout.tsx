@@ -38,8 +38,7 @@ export const metadata: Metadata = {
   },
   // Added Google Search Console Verification here!
   verification: {
-    google: "googlecb028fd6bef509ce",
-  },
+    google: "x0yVVMqFfsRu0tOzbeBHIhKE8WeOg0FwAy8IEkucFpU",  },
 };
 
 export default function RootLayout({
