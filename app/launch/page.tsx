@@ -1,1080 +1,489 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import Link from "next/link";
-import { FaFacebook, FaInstagram } from "react-icons/fa";
-import {
-  ArrowUpRight,
-  BarChart3,
-  BookOpen,
-  CalendarDays,
-  ChevronRight,
-  Eye,
-  Globe2,
-  Layers3,
-  Radio,
-  ShieldCheck,
-  Sparkles,
-  Users,
-  CheckCircle2,
-  X,
-  Mail,
-  Phone,
-  MapPin,
-  Send,
-  Loader2,
-  Bell,
-  ExternalLink,
-} from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from 'react';
 
-// Make sure this path points to your actual supabase client file!
-import { supabase } from "../../lib/supabase";
-import HeadToHead from "../../components/HeadToHead";
+const WEBSITE_URL = 'https://sajda-union.vercel.app/';
 
-/* =========================================================
-   WINGS
-========================================================= */
+export default function Page() {
+  const [phase, setPhase] = useState<'intro' | 'countdown' | 'reveal' | 'live'>('intro');
+  const [count, setCount] = useState(3);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-const wings = [
-  {
-    name: "Da'wa",
-    arabic: "الدعوة",
-    description:
-      "Islamic outreach, learning initiatives and meaningful community engagement.",
-    icon: Globe2,
-    color: "dawa",
-    number: "01",
-  },
-  {
-    name: "Adarsham",
-    arabic: "ആദർശം",
-    description:
-      "Character, academic development and value-oriented student activities.",
-    icon: ShieldCheck,
-    color: "adarsham",
-    number: "02",
-  },
-  {
-    name: "Sargam",
-    arabic: "സർഗം",
-    description:
-      "Creative, cultural and literary activities that encourage expression.",
-    icon: Sparkles,
-    color: "sargam",
-    number: "03",
-  },
-  {
-    name: "Publishing",
-    arabic: "പ്രസിദ്ധീകരണം",
-    description:
-      "Editorial, publishing and media initiatives documenting union life.",
-    icon: BookOpen,
-    color: "publishing",
-    number: "04",
-  },
-] as const;
-
-/* =========================================================
-   FEATURES
-========================================================= */
-
-const features = [
-  {
-    icon: Users,
-    title: "Yearly Committees",
-    text: "Keep every union committee organized by academic year.",
-  },
-  {
-    icon: CalendarDays,
-    title: "Program Archive",
-    text: "Record programs and activities conducted across every wing.",
-  },
-  {
-    icon: BarChart3,
-    title: "Union Metrics",
-    text: "Track structured performance metrics for every union.",
-  },
-  {
-    icon: Radio,
-    title: "Realtime Updates",
-    text: "Leaderboard data updates instantly through Supabase Realtime.",
-  },
-];
-
-/* =========================================================
-   WING CARD
-========================================================= */
-
-function WingCard({ wing }: { wing: (typeof wings)[number] }) {
-  const Icon = wing.icon;
-
-  const styles = {
-    dawa: {
-      icon: "bg-wing-dawa-soft text-wing-dawa",
-      line: "bg-wing-dawa",
-    },
-    adarsham: {
-      icon: "bg-wing-adarsham-soft text-wing-adarsham",
-      line: "bg-wing-adarsham",
-    },
-    sargam: {
-      icon: "bg-wing-sargam-soft text-wing-sargam",
-      line: "bg-wing-sargam",
-    },
-    publishing: {
-      icon: "bg-wing-publishing-soft text-wing-publishing",
-      line: "bg-wing-publishing",
-    },
-  }[wing.color];
-
-  return (
-    <article className="group relative cursor-pointer overflow-hidden rounded-[1.75rem] border border-line bg-white p-6 shadow-ocean-sm transition-all duration-300 hover:-translate-y-1.5 hover:border-ocean-200 hover:shadow-ocean-md">
-      <div
-        className={`absolute left-0 top-0 h-1 w-0 ${styles.line} transition-all duration-500 ease-out group-hover:w-full`}
-      />
-
-      <div className="flex items-start justify-between">
-        <div
-          className={`flex h-12 w-12 items-center justify-center rounded-2xl ${styles.icon} transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3`}
-        >
-          <Icon size={22} strokeWidth={2.5} />
-        </div>
-
-        <span className="text-sm font-extrabold tracking-[0.18em] text-ink-500/40 transition-colors group-hover:text-ocean-950">
-          {wing.number}
-        </span>
-      </div>
-
-      <p className="mt-7 text-sm font-bold text-ink-500">{wing.arabic}</p>
-
-      <h3 className="mt-1 text-2xl font-extrabold tracking-tight text-ocean-950">
-        {wing.name} Wing
-      </h3>
-
-      <p className="mt-3 text-sm font-medium leading-6 text-ink-600">
-        {wing.description}
-      </p>
-
-      <div className="mt-6 flex items-center gap-2 text-xs font-extrabold text-ocean-700">
-        Explore wing
-        <ArrowUpRight
-          size={16}
-          strokeWidth={2.5}
-          className="transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1"
-        />
-      </div>
-    </article>
-  );
-}
-
-/* =========================================================
-   HOME PAGE
-========================================================= */
-
-export default function HomePage() {
-  const [mounted, setMounted] = useState(false);
-  const [showLoader, setShowLoader] = useState(true);
-  const [typedText, setTypedText] = useState("");
-
-  // Announcement State
-  const [announcement, setAnnouncement] = useState<{
-    title: string;
-    body: string;
-  } | null>(null);
-
-  const [showAnnouncement, setShowAnnouncement] = useState(true);
-
-  // Contact Form State
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState<
-    "idle" | "success" | "error"
-  >("idle");
-
-  const fullText =
-    "Students Association of Jamia Nooriyya for Devoted Activities.";
-
-  /* =========================================================
-     INITIALIZATION
-  ========================================================= */
-
-  useEffect(() => {
-    setMounted(true);
-
-    /* -------------------------------------------------------
-       Loader
-    ------------------------------------------------------- */
-
-    const loaderTimer = setTimeout(() => {
-      setShowLoader(false);
-    }, 2800);
-
-    /* -------------------------------------------------------
-       Fetch Top Announcement
-    ------------------------------------------------------- */
-
-    const fetchAnnouncement = async () => {
-      const { data } = await supabase
-        .from("announcements")
-        .select("title, body")
-        .eq("status", "published")
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      if (data) {
-        setAnnouncement(data);
-      }
-    };
-
-    fetchAnnouncement();
-
-    /* -------------------------------------------------------
-       Typewriter effect
-    ------------------------------------------------------- */
-
-    let currentIndex = 0;
-
-    const typingInterval = setInterval(() => {
-      if (currentIndex <= fullText.length) {
-        setTypedText(fullText.slice(0, currentIndex));
-        currentIndex++;
-      } else {
-        clearInterval(typingInterval);
-      }
-    }, 35);
-
-    /* -------------------------------------------------------
-       Cleanup
-    ------------------------------------------------------- */
-
-    return () => {
-      clearInterval(typingInterval);
-      clearTimeout(loaderTimer);
-    };
+  const clearLaunchTimer = useCallback(() => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
   }, []);
 
-  /* =========================================================
-     CONTACT FORM
-  ========================================================= */
+  useEffect(() => clearLaunchTimer, [clearLaunchTimer]);
 
-  const handleSendMessage = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const startLaunch = () => {
+    clearLaunchTimer();
+    setCount(3);
+    setPhase('countdown');
 
-    setIsSubmitting(true);
-    setSubmitStatus("idle");
+    timerRef.current = setInterval(() => {
+      setCount((value) => {
+        if (value <= 1) {
+          clearLaunchTimer();
+          setPhase('reveal');
 
-    const formData = new FormData(e.currentTarget);
+          window.setTimeout(() => setPhase('live'), 1700);
+          return 1;
+        }
+        return value - 1;
+      });
+    }, 900);
+  };
 
-    const payload = {
-      name: String(formData.get("name")),
-      college: String(formData.get("college")),
-      email: String(formData.get("email")),
-      message: String(formData.get("message")),
-      status: "unread",
+  const enterWebsite = () => {
+    window.location.href = WEBSITE_URL;
+  };
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Enter' && phase === 'intro') startLaunch();
+      if (event.key === 'Escape' && phase !== 'intro') {
+        clearLaunchTimer();
+        setPhase('intro');
+        setCount(3);
+      }
     };
 
-    const { error } = await supabase.from("contact_messages").insert(payload);
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [phase, clearLaunchTimer]);
 
-    if (error) {
-      console.error("Message Error:", error);
-      setSubmitStatus("error");
-    } else {
-      setSubmitStatus("success");
-      e.currentTarget.reset();
-
-      setTimeout(() => setSubmitStatus("idle"), 5000);
-    }
-
-    setIsSubmitting(false);
-  };
+  const isIntro = phase === 'intro';
+  const isCountdown = phase === 'countdown';
+  const isReveal = phase === 'reveal';
+  const isLive = phase === 'live';
 
   return (
     <>
-      {/* =====================================================
-          MAIN PAGE
-      ====================================================== */}
+      <style jsx global>{styles}</style>
+      <main className={`launch-page phase-${phase}`}>
+      <div className="noise" aria-hidden="true" />
+      <div className="grid" aria-hidden="true" />
+      <div className="ambient ambient-one" aria-hidden="true" />
+      <div className="ambient ambient-two" aria-hidden="true" />
 
-      <main className="min-h-screen overflow-hidden bg-white text-ink-950">
-        {/* =====================================================
-            LIVE ANNOUNCEMENT BANNER
-        ====================================================== */}
-
-        {announcement && showAnnouncement && (
-          <div className="relative z-50 border-b border-white/10 bg-ocean-950 px-5 py-3 pr-12 shadow-lg animate-in slide-in-from-top-4 fade-in duration-500 sm:px-6 lg:px-8">
-            <div className="mx-auto flex max-w-7xl items-center justify-center gap-3 text-sm font-medium">
-              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-amber-500/20 text-amber-400">
-                <Bell size={14} className="animate-pulse" />
-              </span>
-
-              <span className="truncate">
-                <span className="mr-2 font-extrabold text-amber-400">
-                  {announcement.title}:
-                </span>
-
-                <span className="text-white/90">{announcement.body}</span>
-              </span>
-            </div>
-
-            <button
-              onClick={() => setShowAnnouncement(false)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-white/50 transition-colors hover:bg-white/10 hover:text-white sm:right-6"
-              aria-label="Dismiss announcement"
-            >
-              <X size={16} />
-            </button>
+      <header className="topbar">
+        <div className="brand-lockup">
+          <div className="brand-mark">S</div>
+          <div>
+            <div className="brand-name">SAJDA</div>
+            <div className="brand-sub">CENTRAL COMMITTEE</div>
           </div>
-        )}
+        </div>
 
-        {/* =====================================================
-            HERO
-        ====================================================== */}
+        <div className="edition">
+          <span>OFFICIAL LAUNCH</span>
+          <strong>2026 — 2027</strong>
+        </div>
+      </header>
 
-        <section className="relative overflow-hidden bg-white">
-          <div className="pointer-events-none absolute inset-0">
-            <div
-              className="absolute inset-0 opacity-[0.018]"
-              style={{
-                backgroundImage:
-                  "linear-gradient(#075A8A 1px, transparent 1px), linear-gradient(90deg, #075A8A 1px, transparent 1px)",
-                backgroundSize: "48px 48px",
-              }}
-            />
+      <section className="stage" aria-live="polite">
+        <div className={`prelude ${isIntro ? 'visible' : ''}`}>
+          <p className="eyebrow">A new digital chapter</p>
+          <h1>
+            <span>SAJDA</span>
+            <em>Hub</em>
+          </h1>
+          <p className="descriptor">
+            The official digital platform for the SAJDA Central Committee.
+          </p>
 
-            <div className="absolute left-1/2 top-0 h-[600px] w-[800px] -translate-x-1/2 rounded-full border border-ocean-800/[0.04]" />
+          <button className="launch-button" onClick={startLaunch} type="button">
+            <span>Begin official launch</span>
+            <span className="button-arrow" aria-hidden="true">↗</span>
+          </button>
 
-            <div className="absolute left-1/2 top-20 h-[440px] w-[600px] -translate-x-1/2 rounded-full border border-ocean-800/[0.035]" />
+          <p className="hint">Press Enter to begin</p>
+        </div>
+
+        <div className={`countdown ${isCountdown ? 'visible' : ''}`} aria-hidden={!isCountdown}>
+          <div className="count-label">THE LAUNCH BEGINS IN</div>
+          <div className="count-number" key={count}>{count}</div>
+        </div>
+
+        <div className={`reveal ${isReveal || isLive ? 'visible' : ''}`}>
+          <div className="reveal-line" />
+          <p className="eyebrow">Officially unveiled</p>
+          <div className="reveal-title">
+            <span>SAJDA</span>
+            <strong>HUB.</strong>
           </div>
-
-          <div
-            className={`relative mx-auto max-w-7xl px-5 pb-24 sm:px-8 sm:pb-32 lg:px-10 lg:pb-36 ${
-              announcement && showAnnouncement
-                ? "pt-24 sm:pt-32 lg:pt-36"
-                : "pt-32 sm:pt-40 lg:pt-44"
-            }`}
-          >
-            <div className="mx-auto flex max-w-4xl flex-col items-center text-center">
-              <div
-                className={`mb-8 inline-flex items-center gap-2 rounded-full border border-line bg-ocean-50 px-4 py-2 text-[10px] font-extrabold uppercase tracking-[0.2em] text-ocean-700 transition-all duration-700 ease-out ${
-                  mounted
-                    ? "translate-y-0 opacity-100"
-                    : "translate-y-4 opacity-0"
-                }`}
-              >
-                <span className="h-2 w-2 animate-pulse rounded-full bg-ocean-500" />
-                SAJDA Hub
-                <span className="mx-1 text-line-strong">•</span>
-                2026 — 2027
-              </div>
-
-              <h1
-                className={`max-w-4xl text-[3.4rem] font-black leading-[1] tracking-[-0.045em] text-[#0B1726] transition-all delay-150 duration-700 ease-out sm:text-6xl lg:text-[5.5rem] ${
-                  mounted
-                    ? "translate-y-0 opacity-100"
-                    : "translate-y-6 opacity-0"
-                }`}
-              >
-                Where unions{" "}
-                <span className="block text-ocean-800">grow together.</span>
-              </h1>
-
-              <p className="mt-8 min-h-[64px] max-w-2xl text-[16px] font-bold leading-8 text-[#526579] sm:text-xl">
-                {typedText}
-
-                <span className="ml-1 inline-block h-[18px] w-[3px] animate-pulse bg-ocean-500" />
-              </p>
-
-              <div
-                className={`mt-10 flex flex-col justify-center gap-4 transition-all delay-300 duration-700 ease-out sm:flex-row ${
-                  mounted
-                    ? "translate-y-0 opacity-100"
-                    : "translate-y-4 opacity-0"
-                }`}
-              >
-                <Link
-                  href="/leaderboard"
-                  className="group inline-flex items-center justify-center gap-2 rounded-2xl bg-ocean-950 px-8 py-4 text-[15px] font-extrabold text-white shadow-[0_12px_30px_rgba(3,17,31,0.12)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-ocean-800 hover:shadow-[0_15px_35px_rgba(3,17,31,0.18)]"
-                >
-                  Explore Leaderboard
-                  <ArrowUpRight
-                    size={18}
-                    strokeWidth={2.5}
-                    className="transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-                  />
-                </Link>
-
-                <Link
-                  href="/search"
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl border-2 border-line-strong bg-white px-8 py-4 text-[15px] font-extrabold text-ocean-900 transition-all duration-200 hover:border-ocean-300 hover:bg-ocean-50"
-                >
-                  Search Unions
-                  <ChevronRight size={18} strokeWidth={2.5} />
-                </Link>
-              </div>
-
-              <div
-                className={`mt-16 flex flex-wrap items-center justify-center gap-x-10 gap-y-6 transition-all delay-500 duration-700 ease-out ${
-                  mounted
-                    ? "translate-y-0 opacity-100"
-                    : "translate-y-4 opacity-0"
-                }`}
-              >
-                {[
-                  ["Multi-year", "Academic records"],
-                  ["04", "Dedicated wings"],
-                  ["Live", "Realtime metrics"],
-                ].map(([value, label]) => (
-                  <div key={label} className="text-center">
-                    <p className="text-base font-extrabold text-[#0B1726]">
-                      {value}
-                    </p>
-
-                    <p className="mt-1 text-[11px] font-bold text-[#7B8B9B]">
-                      {label}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* =====================================================
-            QUICK STATS
-        ====================================================== */}
-
-        <section className="px-5 py-10 sm:px-8 lg:px-10">
-          <div className="mx-auto max-w-6xl overflow-hidden rounded-[1.75rem] border border-line bg-white shadow-ocean-md">
-            <div className="grid md:grid-cols-3">
-              {[
-                {
-                  icon: Layers3,
-                  value: "04",
-                  title: "Union Wings",
-                  text: "Structured areas of activity",
-                },
-                {
-                  icon: CalendarDays,
-                  value: "∞",
-                  title: "Academic Years",
-                  text: "A reusable yearly architecture",
-                },
-                {
-                  icon: Radio,
-                  value: "LIVE",
-                  title: "Realtime System",
-                  text: "Instant metric synchronization",
-                },
-              ].map((item, index) => {
-                const Icon = item.icon;
-
-                return (
-                  <div
-                    key={item.title}
-                    className={`group flex items-center gap-5 border-line p-6 transition-colors hover:bg-ocean-50/50 sm:p-8 ${
-                      index !== 2 ? "border-b md:border-b-0 md:border-r" : ""
-                    }`}
-                  >
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-ocean-100 text-ocean-800 transition-transform group-hover:scale-110">
-                      <Icon size={22} strokeWidth={2.5} />
-                    </div>
-
-                    <div>
-                      <p className="text-2xl font-black text-ocean-950">
-                        {item.value}
-                      </p>
-
-                      <p className="text-sm font-extrabold text-ink-900">
-                        {item.title}
-                      </p>
-
-                      <p className="mt-0.5 text-[11px] font-medium text-ink-500">
-                        {item.text}
-                      </p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-
-        {/* =====================================================
-            WINGS
-        ====================================================== */}
-
-        <section className="mx-auto max-w-7xl px-5 py-24 sm:px-8 lg:px-10">
-          <div className="flex flex-col justify-between gap-5 md:flex-row md:items-end">
-            <div className="max-w-2xl">
-              <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-ocean-600">
-                The four wings
-              </p>
-
-              <h2 className="mt-3 text-4xl font-black tracking-[-0.03em] text-ocean-950 sm:text-5xl lg:text-6xl">
-                One union.{" "}
-                <span className="block text-ocean-700">Four dimensions.</span>
-              </h2>
-            </div>
-
-            <p className="max-w-md text-base font-medium leading-7 text-[#526579]">
-              Every major area of union activity gets its own identity while
-              remaining part of one connected platform.
-            </p>
-          </div>
-
-          <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {wings.map((wing) => (
-              <WingCard key={wing.name} wing={wing} />
-            ))}
-          </div>
-        </section>
-
-        {/* =====================================================
-            FEATURE SECTION
-        ====================================================== */}
-
-        <section className="border-y border-line bg-ocean-50/50">
-          <div className="mx-auto max-w-7xl px-5 py-24 sm:px-8 lg:px-10">
-            <div className="grid items-center gap-16 lg:grid-cols-[.9fr_1.1fr]">
-              <div>
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-ocean-100 text-ocean-800">
-                  <Eye size={24} strokeWidth={2.5} />
-                </div>
-
-                <p className="mt-7 text-[11px] font-extrabold uppercase tracking-[0.22em] text-ocean-600">
-                  Designed for continuity
-                </p>
-
-                <h2 className="mt-3 text-4xl font-black leading-tight tracking-[-0.03em] text-ocean-950 sm:text-5xl">
-                  Your union's story <br />
-                  shouldn't reset every year.
-                </h2>
-
-                <p className="mt-6 max-w-lg text-base font-medium leading-8 text-[#526579]">
-                  SAJDA Hub separates every academic year while keeping the
-                  institution's history connected. Committees, programs and
-                  metrics remain structured and accessible.
-                </p>
-
-                <Link
-                  href="/dashboard"
-                  className="group mt-10 inline-flex items-center gap-2 rounded-xl bg-ocean-950 px-6 py-4 text-sm font-extrabold text-white transition hover:bg-ocean-800"
-                >
-                  Explore the platform
-                  <ArrowUpRight
-                    size={17}
-                    strokeWidth={2.5}
-                    className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-                  />
-                </Link>
-              </div>
-
-              <div className="grid gap-5 sm:grid-cols-2">
-                {features.map((feature) => {
-                  const Icon = feature.icon;
-
-                  return (
-                    <div
-                      key={feature.title}
-                      className="group rounded-[1.75rem] border border-line bg-white p-7 transition-all duration-300 hover:-translate-y-1.5 hover:border-ocean-200 hover:shadow-ocean-md"
-                    >
-                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-ocean-50 text-ocean-800 transition-colors group-hover:bg-ocean-100">
-                        <Icon size={22} strokeWidth={2.5} />
-                      </div>
-
-                      <h3 className="mt-6 text-lg font-extrabold text-ocean-950">
-                        {feature.title}
-                      </h3>
-
-                      <p className="mt-2 text-sm font-medium leading-6 text-ink-600">
-                        {feature.text}
-                      </p>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* =====================================================
-            HOW IT WORKS
-        ====================================================== */}
-
-        <section className="bg-white">
-          <div className="mx-auto max-w-7xl px-5 py-24 sm:px-8 lg:px-10">
-            <div className="mx-auto max-w-2xl text-center">
-              <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-ocean-600">
-                Simple by design
-              </p>
-
-              <h2 className="mt-3 text-4xl font-black tracking-tight text-ocean-950 sm:text-5xl">
-                From union activity to insight.
-              </h2>
-            </div>
-
-            <div className="relative mt-20 grid gap-10 md:grid-cols-4">
-              <div className="absolute left-[12%] right-[12%] top-8 hidden h-0.5 bg-ocean-100 md:block" />
-
-              {[
-                ["01", "Union", "Establish the yearly union and committee."],
-                [
-                  "02",
-                  "Programs",
-                  "Document activities across the four wings.",
-                ],
-                [
-                  "03",
-                  "Metrics",
-                  "Maintain structured union performance data.",
-                ],
-                ["04", "Insight", "See the live Best Union Award leaderboard."],
-              ].map(([number, title, text]) => (
-                <div key={number} className="group relative text-center">
-                  <div className="relative mx-auto flex h-16 w-16 items-center justify-center rounded-2xl border-2 border-ocean-200 bg-white text-base font-black text-ocean-800 shadow-ocean-sm transition-transform duration-300 group-hover:-translate-y-1.5 group-hover:shadow-ocean-md">
-                    {number}
-                  </div>
-
-                  <h3 className="mt-6 text-xl font-extrabold text-ocean-950 transition-colors group-hover:text-ocean-700">
-                    {title}
-                  </h3>
-
-                  <p className="mx-auto mt-2 max-w-[220px] text-sm font-medium leading-6 text-[#526579]">
-                    {text}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* =====================================================
-            HEAD-TO-HEAD COMPARISON
-        ====================================================== */}
-
-        <HeadToHead />
-
-        {/* =====================================================
-            CONTACT SECTION
-        ====================================================== */}
-
-        <section className="relative overflow-hidden bg-white py-24 sm:py-32">
-          <div className="pointer-events-none absolute -left-40 top-20 h-80 w-80 rounded-full bg-ocean-100/30 blur-3xl" />
-          <div className="pointer-events-none absolute -right-40 bottom-0 h-96 w-96 rounded-full bg-ocean-100/30 blur-3xl" />
-          <div className="relative mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
-            <div className="grid gap-16 lg:grid-cols-2 lg:gap-24">
-              <div>
-                <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-ocean-600">
-                  Get in Touch
-                </p>
-
-                <h2 className="mt-3 text-4xl font-black tracking-tight text-ocean-950 sm:text-5xl">
-                  Reach out to the Central Committee.
-                </h2>
-
-                <p className="mt-6 text-base font-medium leading-8 text-[#526579]">
-                  Have questions regarding union coordination, program updates,
-                  academic-year records, or leaderboard synchronization? Reach
-                  the SAJDA Central Committee through the official contact
-                  channels below.
-                </p>
-
-                <div className="mt-12 grid gap-4 sm:grid-cols-2">
-                  <a
-                    href="https://www.google.com/maps/search/?api=1&query=Jamia+Nooriya+Arabic+College%2C+Faizabad%2C+Pattikkad%2C+Perinthalmanna%2C+Malappuram%2C+Kerala+679325"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="group rounded-2xl border border-line bg-white p-5 transition-all duration-300 hover:-translate-y-1 hover:border-ocean-200 hover:shadow-ocean-md"
-                  >
-                    <div className="flex items-start gap-4">
-                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-ocean-50 text-ocean-800 transition-transform group-hover:scale-105">
-                        <MapPin size={21} strokeWidth={2.5} />
-                      </div>
-                      <div className="min-w-0">
-                        <div className="flex items-center justify-between gap-3">
-                          <h3 className="text-sm font-extrabold text-ocean-950">
-                            Central Office
-                          </h3>
-                          <ExternalLink
-                            size={14}
-                            className="text-ink-400 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
-                          />
-                        </div>
-                        <p className="mt-1 text-xs font-medium leading-5 text-ink-600">
-                          SAJDA Central Committee
-                          <br />
-                          Jamia Nooriya Arabic College
-                          <br />
-                          Faizabad, Pattikkad P.O., Perinthalmanna
-                          <br />
-                          Malappuram, Kerala — 679325
-                        </p>
-                      </div>
-                    </div>
-                  </a>
-
-                  <div className="rounded-2xl border border-line bg-white p-5 transition-all duration-300 hover:-translate-y-1 hover:border-ocean-200 hover:shadow-ocean-md">
-                    <div className="flex items-start gap-4">
-                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-ocean-50 text-ocean-800">
-                        <Phone size={21} strokeWidth={2.5} />
-                      </div>
-                      <div className="min-w-0">
-                        <h3 className="text-sm font-extrabold text-ocean-950">
-                          Contact Numbers
-                        </h3>
-                        <div className="mt-1 flex flex-col gap-1 text-xs font-bold leading-5 text-ink-600">
-                          <a
-                            href="tel:+919847070200"
-                            className="transition hover:text-ocean-700"
-                          >
-                            +91 98470 70200
-                          </a>
-                          <a
-                            href="tel:+919747399584"
-                            className="transition hover:text-ocean-700"
-                          >
-                            +91 97473 99584
-                          </a>
-                          <span className="pt-1 text-ink-500">
-                            Landline: 04933 235 917 / 04933 235 620
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="rounded-2xl border border-line bg-white p-5 transition-all duration-300 hover:-translate-y-1 hover:border-ocean-200 hover:shadow-ocean-md">
-                    <div className="flex items-start gap-4">
-                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-ocean-50 text-ocean-800">
-                        <Mail size={21} strokeWidth={2.5} />
-                      </div>
-                      <div className="min-w-0">
-                        <h3 className="text-sm font-extrabold text-ocean-950">
-                          Email Addresses
-                        </h3>
-                        <div className="mt-1 flex flex-col gap-1.5 text-xs font-bold leading-5">
-                          <a
-                            href="mailto:jamianooriya@gmail.com"
-                            className="break-all text-ink-600 transition hover:text-ocean-700"
-                          >
-                            jamianooriya@gmail.com
-                          </a>
-                          <a
-                            href="mailto:jamiajuniorcolleges@gmail.com"
-                            className="break-all text-ink-600 transition hover:text-ocean-700"
-                          >
-                            jamiajuniorcolleges@gmail.com
-                          </a>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="rounded-2xl border border-line bg-white p-5 transition-all duration-300 hover:-translate-y-1 hover:border-ocean-200 hover:shadow-ocean-md">
-                    <div className="flex items-start gap-4">
-                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-ocean-50 text-ocean-800">
-                        <Globe2 size={21} strokeWidth={2.5} />
-                      </div>
-                      <div className="min-w-0">
-                        <h3 className="text-sm font-extrabold text-ocean-950">
-                          Official Social Channels
-                        </h3>
-                        <div className="mt-2 flex flex-wrap gap-2">
-                          <span className="inline-flex items-center gap-1.5 rounded-full border border-line bg-ocean-50 px-3 py-1.5 text-[11px] font-extrabold text-ocean-800">
-                            <FaFacebook size={13} /> SAJDA Central Committee
-                          </span>
-                          <a
-                            href="https://instagram.com/sajda_central_committee"
-                            target="_blank"
-                            rel="noreferrer"
-                            className="inline-flex items-center gap-1.5 rounded-full border border-line bg-ocean-50 px-3 py-1.5 text-[11px] font-extrabold text-ocean-800 transition hover:border-ocean-200 hover:bg-ocean-100"
-                          >
-                            <FaInstagram size={13} /> @sajda_central_committee
-                          </a>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="relative overflow-hidden rounded-[2.5rem] border border-line bg-ocean-50/50 p-8 sm:p-10">
-                <form
-                  className="relative z-10 flex flex-col gap-6"
-                  onSubmit={handleSendMessage}
-                >
-                  {submitStatus === "success" && (
-                    <div className="mb-2 flex items-center gap-2 rounded-xl bg-emerald-500/10 p-4 text-sm font-extrabold text-emerald-600">
-                      <CheckCircle2 size={18} />
-                      Message sent! We'll get back to you shortly.
-                    </div>
-                  )}
-
-                  {submitStatus === "error" && (
-                    <div className="mb-2 flex items-center gap-2 rounded-xl bg-red-500/10 p-4 text-sm font-extrabold text-red-600">
-                      <X size={18} />
-                      Error sending message. Please try again.
-                    </div>
-                  )}
-
-                  <div className="grid gap-6 sm:grid-cols-2">
-                    <div className="flex flex-col gap-2">
-                      <label className="text-[11px] font-extrabold uppercase tracking-wide text-ink-500">
-                        Full Name
-                      </label>
-
-                      <input
-                        name="name"
-                        required
-                        type="text"
-                        placeholder="Your name"
-                        className="rounded-xl border border-line bg-white px-4 py-3.5 text-sm font-bold text-ocean-950 outline-none transition-colors focus:border-ocean-400"
-                      />
-                    </div>
-
-                    <div className="flex flex-col gap-2">
-                      <label className="text-[11px] font-extrabold uppercase tracking-wide text-ink-500">
-                        Union / College
-                      </label>
-
-                      <input
-                        name="college"
-                        type="text"
-                        placeholder="College name"
-                        className="rounded-xl border border-line bg-white px-4 py-3.5 text-sm font-bold text-ocean-950 outline-none transition-colors focus:border-ocean-400"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col gap-2">
-                    <label className="text-[11px] font-extrabold uppercase tracking-wide text-ink-500">
-                      Email Address
-                    </label>
-
-                    <input
-                      name="email"
-                      required
-                      type="email"
-                      placeholder="you@example.com"
-                      className="rounded-xl border border-line bg-white px-4 py-3.5 text-sm font-bold text-ocean-950 outline-none transition-colors focus:border-ocean-400"
-                    />
-                  </div>
-
-                  <div className="flex flex-col gap-2">
-                    <label className="text-[11px] font-extrabold uppercase tracking-wide text-ink-500">
-                      Message
-                    </label>
-
-                    <textarea
-                      name="message"
-                      required
-                      rows={4}
-                      placeholder="How can we help you?"
-                      className="resize-none rounded-xl border border-line bg-white px-4 py-3.5 text-sm font-bold text-ocean-950 outline-none transition-colors focus:border-ocean-400"
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="group mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-ocean-950 py-4 text-sm font-extrabold text-white transition-all hover:bg-ocean-800 disabled:cursor-not-allowed disabled:opacity-70"
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <Loader2 size={16} className="animate-spin" />
-                        Sending...
-                      </>
-                    ) : (
-                      <>
-                        Send Message
-                        <Send
-                          size={16}
-                          strokeWidth={2.5}
-                          className="transition-transform group-hover:translate-x-1 group-hover:-translate-y-1"
-                        />
-                      </>
-                    )}
-                  </button>
-                </form>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* =====================================================
-            FINAL CTA
-        ====================================================== */}
-
-        <section className="px-5 py-16 sm:px-8 lg:px-10">
-          <div className="mx-auto max-w-7xl overflow-hidden rounded-[2.5rem] bg-[radial-gradient(ellipse_at_bottom,var(--color-ocean-800),var(--color-ocean-950)_70%)] px-6 py-20 text-center text-white shadow-2xl shadow-ocean-950/20 sm:px-12 sm:py-24">
-            <div className="mx-auto max-w-2xl">
-              <p className="text-[11px] font-extrabold uppercase tracking-[0.25em] text-amber-400">
-                SAJDA Hub · 2026 — 2027
-              </p>
-
-              <h2 className="mt-5 text-4xl font-black tracking-tight sm:text-6xl">
-                See what your union{" "}
-                <span className="block text-ocean-300">is building.</span>
-              </h2>
-
-              <p className="mx-auto mt-6 max-w-xl text-base font-medium leading-7 text-white/70 sm:text-lg">
-                Explore union records, discover programs and follow the live
-                performance landscape.
-              </p>
-
-              <div className="mt-10 flex flex-col justify-center gap-4 sm:flex-row">
-                <Link
-                  href="/leaderboard"
-                  className="group inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-8 py-4 text-[15px] font-extrabold tracking-wide text-ocean-950 transition hover:scale-105 hover:bg-ocean-100"
-                >
-                  Open Leaderboard
-                  <ArrowUpRight
-                    size={18}
-                    strokeWidth={2.5}
-                    className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-                  />
-                </Link>
-
-                <Link
-                  href="/unions"
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl border-2 border-white/20 bg-transparent px-8 py-4 text-[15px] font-extrabold tracking-wide text-white transition hover:scale-105 hover:bg-white/10"
-                >
-                  Browse Unions
-                </Link>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* =====================================================
-            FOOTER
-        ====================================================== */}
-
-        <footer className="border-t border-line bg-white">
-          <div className="mx-auto max-w-7xl px-5 py-16 sm:px-8 lg:px-10">
-            <div className="flex flex-col gap-12 md:flex-row md:justify-between">
-              <div className="max-w-sm">
-                <Link href="/" className="group flex items-center gap-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-ocean-950 text-base font-black text-white shadow-ocean-sm transition-transform group-hover:scale-105">
-                    S
-                  </div>
-
-                  <div>
-                    <p className="text-lg font-black text-ocean-950 transition-colors group-hover:text-ocean-700">
-                      SAJDA Central Committee
-                    </p>
-                  </div>
-                </Link>
-
-                <div className="mt-7 space-y-3 text-sm font-medium leading-relaxed text-ink-600">
-                  <p className="font-extrabold text-ocean-800">
-                    Students Association of Jamia Nooriyya for Devoted
-                    Activities
-                  </p>
-
-                  <p>
-                    Central coordination of Jamia Junior Colleges
-                    <br />
-                    Jamia Nooriya Arabic College
-                    <br />
-                    Faizabad, Pattikkad P.O., Perinthalmanna
-                    <br />
-                    Malappuram District, Kerala — 679325
-                  </p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-x-12 gap-y-10 sm:gap-x-20">
-                <div>
-                  <p className="mb-6 text-[11px] font-extrabold uppercase tracking-[0.2em] text-ink-400">
-                    Platform
-                  </p>
-
-                  <div className="flex flex-col gap-4 text-sm font-bold text-ink-600">
-                    <Link
-                      href="/unions"
-                      className="transition hover:translate-x-1 hover:text-ocean-700"
-                    >
-                      Unions
-                    </Link>
-                    <Link
-                      href="/programs"
-                      className="transition hover:translate-x-1 hover:text-ocean-700"
-                    >
-                      Programs
-                    </Link>
-                    <Link
-                      href="/leaderboard"
-                      className="transition hover:translate-x-1 hover:text-ocean-700"
-                    >
-                      Leaderboard
-                    </Link>
-                  </div>
-                </div>
-
-                <div>
-                  <p className="mb-6 text-[11px] font-extrabold uppercase tracking-[0.2em] text-ink-400">
-                    Portal
-                  </p>
-
-                  <div className="flex flex-col gap-4 text-sm font-bold text-ink-600">
-                    <Link
-                      href="/register"
-                      className="transition hover:translate-x-1 hover:text-ocean-700"
-                    >
-                      Register Union
-                    </Link>
-                    <Link
-                      href="/login"
-                      className="transition hover:translate-x-1 hover:text-ocean-700"
-                    >
-                      Executive Login
-                    </Link>
-                  </div>
-                </div>
-
-                <div className="col-span-2">
-                  <p className="mb-5 text-[11px] font-extrabold uppercase tracking-[0.2em] text-ink-400">
-                    Official Channels
-                  </p>
-
-                  <div className="flex flex-wrap gap-2.5">
-                    <a
-                      href="mailto:jamianooriya@gmail.com"
-                      className="inline-flex items-center gap-2 rounded-xl border border-line bg-white px-3.5 py-2.5 text-xs font-extrabold text-ink-600 transition hover:-translate-y-0.5 hover:border-ocean-200 hover:text-ocean-700"
-                    >
-                      <Mail size={14} />
-                      jamianooriya@gmail.com
-                    </a>
-                    <a
-                      href="https://instagram.com/sajda_central_committee"
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex items-center gap-2 rounded-xl border border-line bg-white px-3.5 py-2.5 text-xs font-extrabold text-ink-600 transition hover:-translate-y-0.5 hover:border-ocean-200 hover:text-ocean-700"
-                    >
-                      <FaInstagram size={14} />
-                      Instagram
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-16 flex flex-col items-center justify-between gap-4 border-t border-line pt-8 text-[12px] font-bold text-ink-400 md:flex-row">
-              <p>
-                © {new Date().getFullYear()} SAJDA Central Committee. All rights
-                reserved.
-              </p>
-
-              <p>
-                Designed & developed by{" "}
-                <span className="font-black text-ocean-700">
-                  PIXIDO_DESIGNS
-                </span>
-              </p>
-            </div>
-          </div>
-        </footer>
+          <p className="reveal-copy">
+            The digital platform of the SAJDA Central Committee is now live.
+          </p>
+          <div className="live-pill"><span /> LIVE • 2026 — 2027</div>
+        </div>
+
+        <div className={`live-action ${isLive ? 'visible' : ''}`}>
+          <button className="enter-button" onClick={enterWebsite} type="button">
+            Enter SAJDA Hub <span aria-hidden="true">↗</span>
+          </button>
+        </div>
+      </section>
+
+      <footer className="footer">
+        <span>Students Association of Jamia Nooriyya Arabic Colleges</span>
+        <span className="footer-dot">•</span>
+        <span>Official Digital Platform</span>
+      </footer>
+
+      <div className="corner corner-tl" aria-hidden="true" />
+      <div className="corner corner-br" aria-hidden="true" />
       </main>
     </>
   );
 }
+
+const styles = `
+  :root {
+    --bg: #07090b;
+    --panel: #0c1013;
+    --text: #f5f7f8;
+    --muted: #8f989f;
+    --line: rgba(255, 255, 255, 0.12);
+    --accent: #cfd8dc;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body { margin: 0; min-height: 100%; background: var(--bg); }
+  body { overflow: hidden; }
+  button { font: inherit; }
+
+  .launch-page {
+    position: relative;
+    min-height: 100svh;
+    overflow: hidden;
+    background:
+      radial-gradient(circle at 50% 46%, rgba(206, 214, 219, 0.07), transparent 30%),
+      linear-gradient(180deg, #0a0c0e 0%, #07090b 55%, #060708 100%);
+    color: var(--text);
+    isolation: isolate;
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+
+  .noise {
+    position: absolute;
+    inset: -50%;
+    pointer-events: none;
+    opacity: 0.045;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.95'/%3E%3C/svg%3E");
+    transform: rotate(5deg);
+    z-index: -1;
+  }
+
+  .grid {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.22;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.028) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.028) 1px, transparent 1px);
+    background-size: 72px 72px;
+    mask-image: radial-gradient(circle at center, black 18%, transparent 78%);
+    -webkit-mask-image: radial-gradient(circle at center, black 18%, transparent 78%);
+  }
+
+  .ambient {
+    position: absolute;
+    width: 40vw;
+    height: 40vw;
+    min-width: 340px;
+    min-height: 340px;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.12;
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  .ambient-one {
+    top: -18vw;
+    left: -10vw;
+    background: #bfc7cc;
+    animation: drift-one 13s ease-in-out infinite alternate;
+  }
+
+  .ambient-two {
+    right: -18vw;
+    bottom: -20vw;
+    background: #68737a;
+    animation: drift-two 17s ease-in-out infinite alternate;
+  }
+
+  .topbar, .footer {
+    position: absolute;
+    left: clamp(24px, 4vw, 64px);
+    right: clamp(24px, 4vw, 64px);
+    z-index: 10;
+  }
+
+  .topbar {
+    top: clamp(22px, 4vh, 40px);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .brand-lockup { display: flex; gap: 13px; align-items: center; }
+
+  .brand-mark {
+    width: 38px;
+    height: 38px;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--line);
+    background: rgba(255,255,255,0.03);
+    color: #fff;
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: -0.03em;
+  }
+
+  .brand-name { font-size: 13px; font-weight: 800; letter-spacing: 0.18em; }
+  .brand-sub { margin-top: 2px; font-size: 8px; letter-spacing: 0.18em; color: var(--muted); }
+
+  .edition { text-align: right; }
+  .edition span { display: block; font-size: 8px; letter-spacing: 0.2em; color: var(--muted); }
+  .edition strong { display: block; margin-top: 4px; font-size: 11px; font-weight: 600; letter-spacing: 0.12em; color: #dfe4e7; }
+
+  .stage {
+    position: relative;
+    min-height: 100svh;
+    display: grid;
+    place-items: center;
+    padding: 100px 24px 92px;
+    text-align: center;
+  }
+
+  .prelude, .countdown, .reveal {
+    position: absolute;
+    left: 24px;
+    right: 24px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  .prelude { opacity: 0; visibility: hidden; transition: opacity .65s ease, visibility .65s ease; }
+  .prelude.visible { opacity: 1; visibility: visible; }
+
+  .eyebrow {
+    margin: 0 0 20px;
+    color: #9fa8ad;
+    font-size: 9px;
+    font-weight: 650;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: clamp(74px, 13vw, 180px);
+    font-weight: 780;
+    line-height: 0.86;
+    letter-spacing: -0.085em;
+  }
+
+  h1 span { display: block; }
+  h1 em {
+    display: block;
+    margin-left: 0.12em;
+    font-size: 0.34em;
+    line-height: 1;
+    font-weight: 350;
+    font-style: normal;
+    letter-spacing: 0.04em;
+    color: #b3bcc1;
+  }
+
+  .descriptor {
+    max-width: 520px;
+    margin: 28px auto 0;
+    color: #949da3;
+    font-size: 14px;
+    line-height: 1.75;
+  }
+
+  .launch-button, .enter-button {
+    border: 0;
+    cursor: pointer;
+    transition: transform .25s ease, background .25s ease, color .25s ease, box-shadow .25s ease;
+  }
+
+  .launch-button {
+    margin-top: 36px;
+    padding: 15px 18px 15px 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 28px;
+    background: #f1f4f5;
+    color: #0a0c0e;
+    font-size: 11px;
+    font-weight: 750;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .launch-button:hover { transform: translateY(-2px); box-shadow: 0 14px 38px rgba(255,255,255,0.11); }
+  .button-arrow { font-size: 18px; line-height: 1; }
+
+  .hint { margin: 18px 0 0; color: #646d73; font-size: 9px; letter-spacing: 0.12em; }
+
+  .countdown { opacity: 0; visibility: hidden; transition: opacity .35s ease, visibility .35s ease; }
+  .countdown.visible { opacity: 1; visibility: visible; }
+  .count-label { margin-bottom: 10px; color: #899197; font-size: 9px; font-weight: 650; letter-spacing: .24em; }
+  .count-number {
+    font-size: clamp(150px, 30vw, 400px);
+    line-height: .8;
+    font-weight: 250;
+    letter-spacing: -0.09em;
+    color: #f5f7f8;
+    animation: count-in .82s cubic-bezier(.18,.84,.24,1);
+    text-shadow: 0 0 70px rgba(255,255,255,.06);
+  }
+
+  .reveal {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .7s ease, visibility .7s ease;
+  }
+
+  .reveal.visible { opacity: 1; visibility: visible; }
+  .reveal-line {
+    width: 1px;
+    height: 68px;
+    margin: 0 auto 24px;
+    background: linear-gradient(to bottom, transparent, #dce2e6, transparent);
+    animation: line-grow .8s ease both;
+  }
+
+  .reveal-title {
+    display: flex;
+    justify-content: center;
+    align-items: baseline;
+    gap: 15px;
+    line-height: .95;
+    letter-spacing: -0.07em;
+  }
+
+  .reveal-title span { font-size: clamp(58px, 10vw, 132px); font-weight: 400; }
+  .reveal-title strong { font-size: clamp(62px, 11vw, 148px); font-weight: 800; }
+  .reveal-copy { max-width: 560px; margin: 28px auto 0; color: #919ba1; font-size: 14px; line-height: 1.7; }
+
+  .live-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 22px;
+    padding: 8px 11px;
+    border: 1px solid rgba(255,255,255,.09);
+    background: rgba(255,255,255,.025);
+    color: #aab3b8;
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: .18em;
+  }
+
+  .live-pill span {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #e9eef0;
+    box-shadow: 0 0 14px rgba(255,255,255,.55);
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+
+  .live-action {
+    position: absolute;
+    left: 24px;
+    right: 24px;
+    bottom: clamp(100px, 14vh, 150px);
+    opacity: 0;
+    transform: translateY(12px);
+    pointer-events: none;
+    transition: opacity .6s ease, transform .6s ease;
+  }
+
+  .live-action.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
+
+  .enter-button {
+    min-width: 220px;
+    padding: 15px 20px;
+    background: rgba(255,255,255,.05);
+    border: 1px solid rgba(255,255,255,.16);
+    color: #f1f4f5;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    backdrop-filter: blur(16px);
+  }
+
+  .enter-button span { margin-left: 14px; font-size: 16px; }
+  .enter-button:hover { transform: translateY(-2px); background: rgba(255,255,255,.09); }
+
+  .footer {
+    bottom: clamp(20px, 3vh, 30px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 9px;
+    color: #5d666b;
+    font-size: 8px;
+    letter-spacing: .1em;
+    text-align: center;
+    text-transform: uppercase;
+  }
+  .footer-dot { color: #343b40; }
+
+  .corner {
+    position: absolute;
+    width: 54px;
+    height: 54px;
+    opacity: .55;
+    pointer-events: none;
+  }
+  .corner-tl { top: 92px; left: 24px; border-top: 1px solid rgba(255,255,255,.11); border-left: 1px solid rgba(255,255,255,.11); }
+  .corner-br { right: 24px; bottom: 70px; border-right: 1px solid rgba(255,255,255,.08); border-bottom: 1px solid rgba(255,255,255,.08); }
+
+  @keyframes count-in {
+    0% { opacity: 0; transform: scale(.76); filter: blur(9px); }
+    70% { opacity: 1; transform: scale(1.025); filter: blur(0); }
+    100% { transform: scale(1); }
+  }
+
+  @keyframes line-grow { from { height: 0; opacity: 0; } to { height: 68px; opacity: 1; } }
+  @keyframes pulse { 0%,100% { opacity: .3; transform: scale(.7); } 50% { opacity: 1; transform: scale(1); } }
+  @keyframes drift-one { from { transform: translate3d(0,0,0); } to { transform: translate3d(8vw, 7vh, 0); } }
+  @keyframes drift-two { from { transform: translate3d(0,0,0); } to { transform: translate3d(-7vw, -5vh, 0); } }
+
+  @media (max-width: 640px) {
+    .topbar { align-items: flex-start; }
+    .edition { max-width: 110px; }
+    .brand-sub { display: none; }
+    .stage { padding-inline: 18px; }
+    .descriptor { max-width: 320px; font-size: 13px; }
+    .reveal-title { gap: 7px; }
+    .footer { left: 18px; right: 18px; gap: 6px; font-size: 7px; }
+    .corner-tl { left: 18px; }
+    .corner-br { right: 18px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: .01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: .01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+`;
+
