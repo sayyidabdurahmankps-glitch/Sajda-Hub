@@ -1,34 +1,39 @@
-"use client";
+'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from 'react';
 
-type Phase = "intro" | "syncing" | "countdown" | "reveal" | "live";
-type TimerId = ReturnType<typeof window.setTimeout>;
+type Phase = 'intro' | 'syncing' | 'countdown' | 'reveal' | 'live';
 
-const WEBSITE_URL = "https://sajda-union.vercel.app/";
+const WEBSITE_URL = 'https://sajda-union.vercel.app/';
 
 const syncSteps = [
-  "Establishing secure connection",
-  "Synchronising committee data",
-  "Indexing programmes and records",
-  "Validating live metrics",
-  "Finalising the digital platform",
-];
+  'Establishing secure connection',
+  'Synchronising committee data',
+  'Indexing programmes and records',
+  'Validating live metrics',
+  'Finalising the digital platform',
+] as const;
+
+const particles = Array.from({ length: 36 }, (_, index) => ({
+  id: index,
+  left: `${(index * 31) % 100}%`,
+  top: `${(index * 47) % 100}%`,
+  delay: `${-(index * 0.17).toFixed(2)}s`,
+  duration: `${(5 + index * 0.13).toFixed(2)}s`,
+}));
 
 export default function Page() {
-  const [phase, setPhase] = useState<Phase>("intro");
+  const [phase, setPhase] = useState<Phase>('intro');
   const [progress, setProgress] = useState(0);
   const [count, setCount] = useState(3);
   const [syncIndex, setSyncIndex] = useState(0);
+
   const timers = useRef<number[]>([]);
   const frame = useRef<number | null>(null);
   const started = useRef(false);
 
   const clearAll = useCallback(() => {
-    timers.current.forEach((id) => {
-      window.clearTimeout(id);
-    });
-
+    timers.current.forEach((id) => window.clearTimeout(id));
     timers.current = [];
 
     if (frame.current !== null) {
@@ -38,24 +43,24 @@ export default function Page() {
   }, []);
 
   const schedule = useCallback((fn: () => void, ms: number): number => {
-    const id = window.setTimeout(fn, ms);
+    const id: number = window.setTimeout(fn, ms);
     timers.current.push(id);
     return id;
   }, []);
 
   const beginCountdown = useCallback(() => {
-    setPhase("countdown");
+    setPhase('countdown');
     setCount(3);
 
     schedule(() => setCount(2), 900);
     schedule(() => setCount(1), 1800);
-    schedule(() => setPhase("reveal"), 2700);
-    schedule(() => setPhase("live"), 4050);
+    schedule(() => setPhase('reveal'), 2700);
+    schedule(() => setPhase('live'), 4150);
 
-    // Automatically open the real SAJDA website.
+    // Automatic hand-off to the live SAJDA Hub after the official reveal.
     schedule(() => {
       window.location.assign(WEBSITE_URL);
-    }, 6800);
+    }, 7600);
   }, [schedule]);
 
   const startLaunch = useCallback(() => {
@@ -64,15 +69,15 @@ export default function Page() {
     started.current = true;
     clearAll();
 
-    setPhase("syncing");
+    setPhase('syncing');
     setProgress(0);
     setSyncIndex(0);
 
-    const duration = 3600;
-    const start = window.performance.now();
+    const duration = 3900;
+    const startedAt = window.performance.now();
 
     const animate = (now: number) => {
-      const elapsed = now - start;
+      const elapsed = now - startedAt;
       const ratio = Math.min(elapsed / duration, 1);
       const eased = 1 - Math.pow(1 - ratio, 3);
 
@@ -87,7 +92,7 @@ export default function Page() {
 
     frame.current = window.requestAnimationFrame(animate);
 
-    [650, 1350, 2050, 2800].forEach((ms, index) => {
+    [700, 1450, 2200, 3000].forEach((ms, index) => {
       schedule(() => setSyncIndex(index + 1), ms);
     });
 
@@ -97,16 +102,16 @@ export default function Page() {
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (started.current) return;
-      if (event.code !== "Space") return;
+      if (event.code !== 'Space') return;
 
       event.preventDefault();
       startLaunch();
     };
 
-    window.addEventListener("keydown", onKeyDown);
+    window.addEventListener('keydown', onKeyDown);
 
     return () => {
-      window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener('keydown', onKeyDown);
     };
   }, [startLaunch]);
 
@@ -116,9 +121,7 @@ export default function Page() {
 
   return (
     <main className={`launch launch--${phase}`}>
-      <style jsx global>
-        {styles}
-      </style>
+      <style jsx global>{styles}</style>
 
       <div className="ambient ambient--one" />
       <div className="ambient ambient--two" />
@@ -128,16 +131,21 @@ export default function Page() {
 
       {particles.map((particle) => (
         <i
-          key={particle}
+          key={particle.id}
           className="particle"
-          style={{ ["--i" as string]: particle }}
+          aria-hidden="true"
+          style={{
+            left: particle.left,
+            top: particle.top,
+            animationDelay: particle.delay,
+            animationDuration: particle.duration,
+          }}
         />
       ))}
 
       <header className="topbar">
         <div className="brand">
           <div className="brand-mark">S</div>
-
           <div>
             <div className="brand-name">SAJDA</div>
             <div className="brand-sub">CENTRAL COMMITTEE</div>
@@ -151,14 +159,14 @@ export default function Page() {
       </header>
 
       <div className="stage">
-        {phase === "intro" && (
+        {phase === 'intro' && (
           <section className="intro scene scene--active">
             <div className="eyebrow">
               <span className="status-dot" />
               OFFICIAL WEBSITE UNVEILING
             </div>
 
-            <div className="hero-mark">
+            <div className="hero-mark" aria-hidden="true">
               <div className="hero-mark-ring hero-mark-ring--a" />
               <div className="hero-mark-ring hero-mark-ring--b" />
               <div className="hero-mark-core">S</div>
@@ -173,7 +181,7 @@ export default function Page() {
             </h1>
 
             <p className="intro-copy">
-              One connected digital platform for the work, programmes, records
+              A connected digital platform for the work, programmes, records,
               and momentum of the SAJDA Central Committee.
             </p>
 
@@ -192,21 +200,20 @@ export default function Page() {
           </section>
         )}
 
-        {phase === "syncing" && (
+        {phase === 'syncing' && (
           <section className="sync scene scene--active" aria-live="polite">
             <div className="sync-visual" aria-hidden="true">
               <div className="sync-core">
                 <span>S</span>
               </div>
-
               <div className="sync-orbit sync-orbit--1" />
               <div className="sync-orbit sync-orbit--2" />
               <div className="sync-orbit sync-orbit--3" />
-
               <i className="sync-node sync-node--1" />
               <i className="sync-node sync-node--2" />
               <i className="sync-node sync-node--3" />
               <i className="sync-node sync-node--4" />
+              <i className="sync-node sync-node--5" />
             </div>
 
             <p className="section-label">SYSTEM PREPARATION</p>
@@ -224,7 +231,7 @@ export default function Page() {
               <strong>{progress}%</strong>
             </div>
 
-            <div className="sync-track">
+            <div className="sync-track" aria-hidden="true">
               <span style={{ width: `${progress}%` }} />
             </div>
 
@@ -232,11 +239,9 @@ export default function Page() {
               <span>
                 COMMITTEES <b>SYNCED</b>
               </span>
-
               <span>
                 PROGRAMMES <b>INDEXED</b>
               </span>
-
               <span>
                 LIVE METRICS <b>VALIDATED</b>
               </span>
@@ -244,7 +249,7 @@ export default function Page() {
           </section>
         )}
 
-        {phase === "countdown" && (
+        {phase === 'countdown' && (
           <section
             className="countdown scene scene--active"
             aria-live="assertive"
@@ -270,9 +275,10 @@ export default function Page() {
           </section>
         )}
 
-        {(phase === "reveal" || phase === "live") && (
+        {(phase === 'reveal' || phase === 'live') && (
           <section className="reveal scene scene--active" aria-live="polite">
             <div className="reveal-burst" aria-hidden="true" />
+            <div className="reveal-burst reveal-burst--two" aria-hidden="true" />
             <div className="reveal-line" aria-hidden="true" />
 
             <p className="section-label">OFFICIAL ANNOUNCEMENT</p>
@@ -285,8 +291,7 @@ export default function Page() {
             <p className="reveal-title">is officially live.</p>
 
             <p className="reveal-copy">
-              The new digital platform of the SAJDA Central Committee is now
-              open.
+              The new digital platform of the SAJDA Central Committee is now open.
             </p>
 
             <div className="live-badge">
@@ -296,11 +301,11 @@ export default function Page() {
           </section>
         )}
 
-        {phase === "live" && (
+        {phase === 'live' && (
           <div className="opening" aria-live="polite">
             <span className="opening-dot" />
             OPENING SAJDA HUB
-            <div className="opening-track">
+            <div className="opening-track" aria-hidden="true">
               <span />
             </div>
           </div>
@@ -309,14 +314,12 @@ export default function Page() {
 
       <footer className="footer">
         <span>Students Association of Jamia Nooriyya Arabic Colleges</span>
-
         <i />
-
         <span>Official launch experience</span>
       </footer>
 
-      <div className="corner corner--tl" />
-      <div className="corner corner--br" />
+      <div className="corner corner--tl" aria-hidden="true" />
+      <div className="corner corner--br" aria-hidden="true" />
     </main>
   );
 }
@@ -326,8 +329,6 @@ const styles = `
     --bg: #07090c;
     --text: #f5f7f8;
     --muted: #7f8a92;
-    --soft: #b7c1c7;
-    --line: rgba(255,255,255,.10);
   }
 
   * {
@@ -357,22 +358,9 @@ const styles = `
     isolation: isolate;
     color: var(--text);
     background:
-      radial-gradient(
-        circle at 50% 44%,
-        rgba(220,230,236,.075),
-        transparent 24%
-      ),
-      radial-gradient(
-        circle at 10% 85%,
-        rgba(102,130,148,.09),
-        transparent 30%
-      ),
-      linear-gradient(
-        145deg,
-        #07090c 0%,
-        #0b0f13 46%,
-        #06080a 100%
-      );
+      radial-gradient(circle at 50% 44%, rgba(220,230,236,.075), transparent 24%),
+      radial-gradient(circle at 10% 85%, rgba(102,130,148,.09), transparent 30%),
+      linear-gradient(145deg, #07090c 0%, #0b0f13 46%, #06080a 100%);
     font-family:
       Inter,
       ui-sans-serif,
@@ -387,12 +375,7 @@ const styles = `
     content: "";
     position: absolute;
     inset: 0;
-    background:
-      radial-gradient(
-        circle at 50% 50%,
-        transparent 0 42%,
-        rgba(0,0,0,.44) 100%
-      );
+    background: radial-gradient(circle at 50% 50%, transparent 0 42%, rgba(0,0,0,.44) 100%);
     pointer-events: none;
     z-index: 1;
   }
@@ -428,23 +411,10 @@ const styles = `
     inset: 0;
     opacity: .16;
     background-image:
-      linear-gradient(
-        rgba(255,255,255,.027) 1px,
-        transparent 1px
-      ),
-      linear-gradient(
-        90deg,
-        rgba(255,255,255,.027) 1px,
-        transparent 1px
-      );
+      linear-gradient(rgba(255,255,255,.027) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.027) 1px, transparent 1px);
     background-size: 44px 44px;
-    mask-image:
-      radial-gradient(
-        circle at center,
-        black 0%,
-        rgba(0,0,0,.65) 52%,
-        transparent 100%
-      );
+    mask-image: radial-gradient(circle at center, black 0%, rgba(0,0,0,.65) 52%, transparent 100%);
     pointer-events: none;
     z-index: 0;
   }
@@ -455,13 +425,7 @@ const styles = `
     top: -10vh;
     width: 100%;
     height: 1px;
-    background:
-      linear-gradient(
-        90deg,
-        transparent,
-        rgba(220,233,239,.45),
-        transparent
-      );
+    background: linear-gradient(90deg, transparent, rgba(220,233,239,.45), transparent);
     opacity: .18;
     animation: scan 8s linear infinite;
     pointer-events: none;
@@ -479,22 +443,13 @@ const styles = `
   }
 
   .particle {
-    --i: 0;
     position: absolute;
-    left: calc((var(--i) * 31) % 100 * 1%);
-    top: calc((var(--i) * 47) % 100 * 1%);
     width: 2px;
     height: 2px;
     border-radius: 50%;
     background: rgba(235,242,245,.5);
     opacity: .14;
-    animation:
-      particleFloat
-      calc(5s + (var(--i) * .13s))
-      ease-in-out
-      infinite
-      alternate;
-    animation-delay: calc(var(--i) * -.17s);
+    animation: particleFloat ease-in-out infinite alternate;
     pointer-events: none;
     z-index: 2;
   }
@@ -527,8 +482,7 @@ const styles = `
     height: 36px;
     border: 1px solid rgba(255,255,255,.14);
     background: rgba(255,255,255,.035);
-    box-shadow:
-      inset 0 0 20px rgba(255,255,255,.025);
+    box-shadow: inset 0 0 20px rgba(255,255,255,.025);
     font-size: 15px;
     font-weight: 800;
     letter-spacing: -.05em;
@@ -582,11 +536,7 @@ const styles = `
   }
 
   .scene--active {
-    animation:
-      sceneIn
-      .8s
-      cubic-bezier(.2,.8,.2,1)
-      both;
+    animation: sceneIn .8s cubic-bezier(.2,.8,.2,1) both;
   }
 
   .eyebrow,
@@ -634,9 +584,7 @@ const styles = `
     border: 1px solid rgba(255,255,255,.18);
     border-radius: 50%;
     background: rgba(255,255,255,.03);
-    box-shadow:
-      0 0 70px rgba(211,226,234,.07),
-      inset 0 0 22px rgba(255,255,255,.045);
+    box-shadow: 0 0 70px rgba(211,226,234,.07), inset 0 0 22px rgba(255,255,255,.045);
     font-size: 22px;
     font-weight: 800;
   }
@@ -655,9 +603,7 @@ const styles = `
 
   .hero-mark-ring--b {
     inset: 17px 0;
-    transform:
-      rotate(54deg)
-      scaleY(1.3);
+    transform: rotate(54deg) scaleY(1.3);
     animation: heroOrbitReverse 6s linear infinite;
   }
 
@@ -700,10 +646,7 @@ const styles = `
     color: #edf2f4;
     background: rgba(255,255,255,.05);
     cursor: pointer;
-    transition:
-      transform .2s ease,
-      border-color .2s ease,
-      background .2s ease;
+    transition: transform .2s ease, border-color .2s ease, background .2s ease;
   }
 
   .launch-button:hover {
@@ -788,17 +731,13 @@ const styles = `
 
   .sync-orbit--2 {
     inset: 3px 27px;
-    transform:
-      rotate(75deg)
-      scaleY(1.33);
+    transform: rotate(75deg) scaleY(1.33);
     animation: orbitReverse 5.5s linear infinite;
   }
 
   .sync-orbit--3 {
     inset: 28px -2px;
-    transform:
-      rotate(-40deg)
-      scaleX(1.28);
+    transform: rotate(-40deg) scaleX(1.28);
     animation: orbit 9s linear infinite;
   }
 
@@ -812,28 +751,11 @@ const styles = `
     animation: pulse 1.25s ease-in-out infinite;
   }
 
-  .sync-node--1 {
-    top: 20px;
-    left: 32px;
-  }
-
-  .sync-node--2 {
-    top: 69px;
-    right: 8px;
-    animation-delay: .25s;
-  }
-
-  .sync-node--3 {
-    left: 78px;
-    bottom: 5px;
-    animation-delay: .5s;
-  }
-
-  .sync-node--4 {
-    top: 78px;
-    left: 5px;
-    animation-delay: .75s;
-  }
+  .sync-node--1 { top: 18px; left: 34px; }
+  .sync-node--2 { top: 64px; right: 5px; animation-delay: .25s; }
+  .sync-node--3 { left: 77px; bottom: 4px; animation-delay: .5s; }
+  .sync-node--4 { top: 82px; left: 5px; animation-delay: .75s; }
+  .sync-node--5 { top: 27px; right: 34px; animation-delay: 1s; }
 
   .sync h2 {
     margin: 15px 0 0;
@@ -883,12 +805,7 @@ const styles = `
   .sync-track span {
     display: block;
     height: 100%;
-    background:
-      linear-gradient(
-        90deg,
-        #778d9e,
-        #e9eef0
-      );
+    background: linear-gradient(90deg, #778d9e, #e9eef0);
     box-shadow: 0 0 16px rgba(214,227,234,.35);
     transition: width .15s ease;
   }
@@ -917,7 +834,7 @@ const styles = `
     position: absolute;
     left: 50%;
     top: 52%;
-    transform: translate(-50%,-50%);
+    transform: translate(-50%, -50%);
     border: 1px solid rgba(255,255,255,.055);
     border-radius: 50%;
     pointer-events: none;
@@ -950,10 +867,7 @@ const styles = `
     line-height: .75;
     letter-spacing: -.11em;
     font-weight: 180;
-    animation:
-      countImpact
-      .85s
-      cubic-bezier(.14,.86,.2,1);
+    animation: countImpact .85s cubic-bezier(.14,.86,.2,1);
     text-shadow: 0 0 90px rgba(224,235,240,.06);
   }
 
@@ -992,10 +906,14 @@ const styles = `
     top: 46%;
     width: min(44vw, 520px);
     height: min(44vw, 520px);
-    transform: translate(-50%,-50%);
+    transform: translate(-50%, -50%);
     border: 1px solid rgba(255,255,255,.04);
     border-radius: 50%;
     animation: burst 1.6s ease-out both;
+  }
+
+  .reveal-burst--two {
+    animation-delay: .18s;
   }
 
   .reveal-burst::before,
@@ -1011,13 +929,7 @@ const styles = `
     width: 1px;
     height: 76px;
     margin: 0 auto 24px;
-    background:
-      linear-gradient(
-        180deg,
-        transparent,
-        #e5ecef,
-        transparent
-      );
+    background: linear-gradient(180deg, transparent, #e5ecef, transparent);
     animation: lineIn .8s ease both;
   }
 
@@ -1028,12 +940,7 @@ const styles = `
     gap: 14px;
     letter-spacing: -.08em;
     line-height: .9;
-    animation:
-      wordIn
-      1s
-      .05s
-      cubic-bezier(.18,.82,.23,1)
-      both;
+    animation: wordIn 1s .05s cubic-bezier(.18,.82,.23,1) both;
   }
 
   .wordmark span {
@@ -1118,13 +1025,7 @@ const styles = `
     display: block;
     width: 32%;
     height: 100%;
-    background:
-      linear-gradient(
-        90deg,
-        transparent,
-        #dfe8ec,
-        transparent
-      );
+    background: linear-gradient(90deg, transparent, #dfe8ec, transparent);
     animation: openSweep 1.2s ease-in-out infinite;
   }
 
@@ -1182,30 +1083,18 @@ const styles = `
   }
 
   @keyframes driftOne {
-    from {
-      transform: translate3d(0,0,0);
-    }
-    to {
-      transform: translate3d(7vw,-5vh,0);
-    }
+    from { transform: translate3d(0,0,0); }
+    to { transform: translate3d(7vw,-5vh,0); }
   }
 
   @keyframes driftTwo {
-    from {
-      transform: translate3d(0,0,0);
-    }
-    to {
-      transform: translate3d(-6vw,7vh,0);
-    }
+    from { transform: translate3d(0,0,0); }
+    to { transform: translate3d(-6vw,7vh,0); }
   }
 
   @keyframes scan {
-    from {
-      transform: translateY(-10vh);
-    }
-    to {
-      transform: translateY(120vh);
-    }
+    from { transform: translateY(-10vh); }
+    to { transform: translateY(120vh); }
   }
 
   @keyframes particleFloat {
@@ -1231,57 +1120,33 @@ const styles = `
   }
 
   @keyframes heroOrbit {
-    from {
-      rotate: 0deg;
-    }
-    to {
-      rotate: 360deg;
-    }
+    from { rotate: 0deg; }
+    to { rotate: 360deg; }
   }
 
   @keyframes heroOrbitReverse {
-    from {
-      rotate: 360deg;
-    }
-    to {
-      rotate: 0deg;
-    }
+    from { rotate: 360deg; }
+    to { rotate: 0deg; }
   }
 
   @keyframes orbit {
-    from {
-      rotate: 0deg;
-    }
-    to {
-      rotate: 360deg;
-    }
+    from { rotate: 0deg; }
+    to { rotate: 360deg; }
   }
 
   @keyframes orbitReverse {
-    from {
-      rotate: 360deg;
-    }
-    to {
-      rotate: 0deg;
-    }
+    from { rotate: 360deg; }
+    to { rotate: 0deg; }
   }
 
   @keyframes ringSpin {
-    from {
-      rotate: 0deg;
-    }
-    to {
-      rotate: 360deg;
-    }
+    from { rotate: 0deg; }
+    to { rotate: 360deg; }
   }
 
   @keyframes ringSpinReverse {
-    from {
-      rotate: 360deg;
-    }
-    to {
-      rotate: 0deg;
-    }
+    from { rotate: 360deg; }
+    to { rotate: 0deg; }
   }
 
   @keyframes countImpact {
@@ -1354,12 +1219,8 @@ const styles = `
       transform: translateX(-150%);
       opacity: 0;
     }
-    25% {
-      opacity: 1;
-    }
-    75% {
-      opacity: 1;
-    }
+    25% { opacity: 1; }
+    75% { opacity: 1; }
     100% {
       transform: translateX(430%);
       opacity: 0;
