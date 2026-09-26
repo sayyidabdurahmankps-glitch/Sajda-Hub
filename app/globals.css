@@ -1,21 +1,24 @@
 @import "tailwindcss";
 
 @theme {
-  /* Keep standard ocean colors if needed elsewhere */
-  --color-ocean-50: #f4f8f5;
-  --color-ocean-100: #e3ede5;
-  --color-ocean-200: #c5dbcc;
-  --color-ocean-300: #98c2a8;
-  --color-ocean-400: #6ca583;
-  --color-ocean-500: #498865;
-  --color-ocean-600: #3a6d51;
-  --color-ocean-700: #315943;
-  --color-ocean-800: #365c49;
-  --color-ocean-900: #2d4d3d;
-  --color-ocean-950: #21382c;
+  /* 
+    Medium Green Palette 
+    (Vibrant and balanced, avoiding overly dark or pale extremes)
+  */
+  --color-ocean-50: #f0fdf4;
+  --color-ocean-100: #dcfce7;
+  --color-ocean-200: #bbf7d0;
+  --color-ocean-300: #86efac;
+  --color-ocean-400: #4ade80;
+  --color-ocean-500: #22c55e;  /* True medium green */
+  --color-ocean-600: #16a34a;
+  --color-ocean-700: #15803d;
+  --color-ocean-800: #166534;
+  --color-ocean-900: #14532d;
+  --color-ocean-950: #052e16;  /* Deepest contrast for backgrounds */
 
-  /* Dedicated Sage theme for your exact screenshot green */
-  --color-sage-950: #365c49; 
+  /* Updated Sage for consistency if still used in the Navbar */
+  --color-sage-950: #166534;
 
   /* Ink Palette (Text) */
   --color-ink-500: #64748B;
@@ -23,8 +26,13 @@
   --color-ink-900: #0F172A;
   --color-ink-950: #0B1726;
 
+  /* Structural Colors */
   --color-line: #E2E8F0;
   --color-line-strong: #CBD5E1;
+
+  /* Custom Shadows tinted to the new medium green */
+  --shadow-ocean-sm: 0 4px 20px 0 rgba(22, 163, 74, 0.08);
+  --shadow-ocean-md: 0 12px 30px 0 rgba(22, 163, 74, 0.15);
 }
 
 body {
