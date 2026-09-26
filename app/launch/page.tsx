@@ -1,37 +1,34 @@
-'use client';
+"use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-type Phase = 'intro' | 'syncing' | 'countdown' | 'reveal' | 'live';
+type Phase = "intro" | "syncing" | "countdown" | "reveal" | "live";
 type TimerId = ReturnType<typeof window.setTimeout>;
 
-const WEBSITE_URL = 'https://sajda-union.vercel.app/';
+const WEBSITE_URL = "https://sajda-union.vercel.app/";
 
 const syncSteps = [
-  'Establishing secure connection',
-  'Synchronising committee data',
-  'Indexing programmes and records',
-  'Validating live metrics',
-  'Finalising the digital platform',
+  "Establishing secure connection",
+  "Synchronising committee data",
+  "Indexing programmes and records",
+  "Validating live metrics",
+  "Finalising the digital platform",
 ];
 
 export default function Page() {
-  const [phase, setPhase] = useState<Phase>('intro');
+  const [phase, setPhase] = useState<Phase>("intro");
   const [progress, setProgress] = useState(0);
   const [count, setCount] = useState(3);
   const [syncIndex, setSyncIndex] = useState(0);
-
-  const timers = useRef<TimerId[]>([]);
+  const timers = useRef<number[]>([]);
   const frame = useRef<number | null>(null);
   const started = useRef(false);
 
-  const particles = useMemo(
-    () => Array.from({ length: 34 }, (_, i) => i),
-    [],
-  );
-
   const clearAll = useCallback(() => {
-    timers.current.forEach((id) => window.clearTimeout(id));
+    timers.current.forEach((id) => {
+      window.clearTimeout(id);
+    });
+
     timers.current = [];
 
     if (frame.current !== null) {
@@ -40,20 +37,20 @@ export default function Page() {
     }
   }, []);
 
-  const schedule = useCallback((fn: () => void, ms: number) => {
-    const id: TimerId = window.setTimeout(fn, ms);
+  const schedule = useCallback((fn: () => void, ms: number): number => {
+    const id = window.setTimeout(fn, ms);
     timers.current.push(id);
     return id;
   }, []);
 
   const beginCountdown = useCallback(() => {
-    setPhase('countdown');
+    setPhase("countdown");
     setCount(3);
 
     schedule(() => setCount(2), 900);
     schedule(() => setCount(1), 1800);
-    schedule(() => setPhase('reveal'), 2700);
-    schedule(() => setPhase('live'), 4050);
+    schedule(() => setPhase("reveal"), 2700);
+    schedule(() => setPhase("live"), 4050);
 
     // Automatically open the real SAJDA website.
     schedule(() => {
@@ -67,7 +64,7 @@ export default function Page() {
     started.current = true;
     clearAll();
 
-    setPhase('syncing');
+    setPhase("syncing");
     setProgress(0);
     setSyncIndex(0);
 
@@ -100,27 +97,28 @@ export default function Page() {
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (started.current) return;
-      if (event.code !== 'Space') return;
+      if (event.code !== "Space") return;
 
       event.preventDefault();
       startLaunch();
     };
 
-    window.addEventListener('keydown', onKeyDown);
+    window.addEventListener("keydown", onKeyDown);
 
     return () => {
-      window.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener("keydown", onKeyDown);
     };
   }, [startLaunch]);
 
   useEffect(() => clearAll, [clearAll]);
 
-  const activeSyncStep =
-    syncSteps[Math.min(syncIndex, syncSteps.length - 1)];
+  const activeSyncStep = syncSteps[Math.min(syncIndex, syncSteps.length - 1)];
 
   return (
     <main className={`launch launch--${phase}`}>
-      <style jsx global>{styles}</style>
+      <style jsx global>
+        {styles}
+      </style>
 
       <div className="ambient ambient--one" />
       <div className="ambient ambient--two" />
@@ -132,7 +130,7 @@ export default function Page() {
         <i
           key={particle}
           className="particle"
-          style={{ ['--i' as string]: particle }}
+          style={{ ["--i" as string]: particle }}
         />
       ))}
 
@@ -153,7 +151,7 @@ export default function Page() {
       </header>
 
       <div className="stage">
-        {phase === 'intro' && (
+        {phase === "intro" && (
           <section className="intro scene scene--active">
             <div className="eyebrow">
               <span className="status-dot" />
@@ -175,8 +173,8 @@ export default function Page() {
             </h1>
 
             <p className="intro-copy">
-              One connected digital platform for the work, programmes,
-              records and momentum of the SAJDA Central Committee.
+              One connected digital platform for the work, programmes, records
+              and momentum of the SAJDA Central Committee.
             </p>
 
             <button
@@ -186,23 +184,16 @@ export default function Page() {
               aria-label="Begin official SAJDA website unveiling"
             >
               <span className="keycap">SPACE</span>
-              <span className="button-text">
-                Begin official unveiling
-              </span>
+              <span className="button-text">Begin official unveiling</span>
               <span className="button-arrow">↗</span>
             </button>
 
-            <div className="one-press">
-              ONE PRESS. THE REST IS AUTOMATIC.
-            </div>
+            <div className="one-press">ONE PRESS. THE REST IS AUTOMATIC.</div>
           </section>
         )}
 
-        {phase === 'syncing' && (
-          <section
-            className="sync scene scene--active"
-            aria-live="polite"
-          >
+        {phase === "syncing" && (
+          <section className="sync scene scene--active" aria-live="polite">
             <div className="sync-visual" aria-hidden="true">
               <div className="sync-core">
                 <span>S</span>
@@ -253,7 +244,7 @@ export default function Page() {
           </section>
         )}
 
-        {phase === 'countdown' && (
+        {phase === "countdown" && (
           <section
             className="countdown scene scene--active"
             aria-live="assertive"
@@ -269,9 +260,7 @@ export default function Page() {
               {count}
             </div>
 
-            <div className="count-caption">
-              THE PLATFORM WILL BE UNVEILED
-            </div>
+            <div className="count-caption">THE PLATFORM WILL BE UNVEILED</div>
 
             <div className="count-footer">
               SAJDA CENTRAL COMMITTEE
@@ -281,30 +270,23 @@ export default function Page() {
           </section>
         )}
 
-        {(phase === 'reveal' || phase === 'live') && (
-          <section
-            className="reveal scene scene--active"
-            aria-live="polite"
-          >
+        {(phase === "reveal" || phase === "live") && (
+          <section className="reveal scene scene--active" aria-live="polite">
             <div className="reveal-burst" aria-hidden="true" />
             <div className="reveal-line" aria-hidden="true" />
 
-            <p className="section-label">
-              OFFICIAL ANNOUNCEMENT
-            </p>
+            <p className="section-label">OFFICIAL ANNOUNCEMENT</p>
 
             <div className="wordmark">
               <span>SAJDA</span>
               <strong>HUB.</strong>
             </div>
 
-            <p className="reveal-title">
-              is officially live.
-            </p>
+            <p className="reveal-title">is officially live.</p>
 
             <p className="reveal-copy">
-              The new digital platform of the SAJDA Central Committee
-              is now open.
+              The new digital platform of the SAJDA Central Committee is now
+              open.
             </p>
 
             <div className="live-badge">
@@ -314,11 +296,10 @@ export default function Page() {
           </section>
         )}
 
-        {phase === 'live' && (
+        {phase === "live" && (
           <div className="opening" aria-live="polite">
             <span className="opening-dot" />
             OPENING SAJDA HUB
-
             <div className="opening-track">
               <span />
             </div>
@@ -327,9 +308,7 @@ export default function Page() {
       </div>
 
       <footer className="footer">
-        <span>
-          Students Association of Jamia Nooriyya Arabic Colleges
-        </span>
+        <span>Students Association of Jamia Nooriyya Arabic Colleges</span>
 
         <i />
 
