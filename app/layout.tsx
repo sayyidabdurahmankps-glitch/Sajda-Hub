@@ -36,7 +36,10 @@ export const metadata: Metadata = {
     icon: "/icon.svg",
     apple: "/icon.svg",
   },
-  
+  // Added Google Search Console Verification here!
+  verification: {
+    google: "googlecb028fd6bef509ce",
+  },
 };
 
 export default function RootLayout({
