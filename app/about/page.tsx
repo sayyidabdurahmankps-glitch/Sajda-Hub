@@ -155,33 +155,6 @@ export default function AboutPage() {
           </div>
         </div>
 
-        {/* =========================================================
-            BOTTOM CTA
-        ========================================================== */}
-        <div className="mx-auto mt-32 max-w-5xl overflow-hidden rounded-[2.5rem] bg-[radial-gradient(ellipse_at_bottom,var(--color-ocean-800),var(--color-ocean-950)_70%)] px-6 py-20 text-center text-white sm:px-12 sm:py-24 shadow-2xl shadow-ocean-950/20">
-          <div className="mx-auto max-w-2xl">
-            <p className="text-[11px] font-extrabold uppercase tracking-[0.25em] text-amber-400">
-              Join the Network
-            </p>
-            <h2 className="mt-5 text-4xl font-black tracking-tight sm:text-5xl">
-              Explore union activities.
-            </h2>
-            <p className="mx-auto mt-6 max-w-xl text-base font-medium leading-7 text-white/70">
-              See how the four wings come to life across junior colleges in the current academic year.
-            </p>
-
-            <div className="mt-10 flex justify-center">
-              <Link
-                href="/programs"
-                className="group inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-8 py-4 text-[15px] font-extrabold tracking-wide text-ocean-950 transition hover:bg-ocean-100 hover:scale-105"
-              >
-                View Programs
-                <ArrowUpRight size={18} strokeWidth={2.5} className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-              </Link>
-            </div>
-          </div>
-        </div>
-
       </div>
     </main>
   );
