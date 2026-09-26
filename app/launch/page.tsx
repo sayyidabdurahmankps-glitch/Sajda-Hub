@@ -4,47 +4,66 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
+const BOOT_SEQUENCE = [
+  "Awaiting initialization command",
+  "Authenticating secure environment...",
+  "Syncing relational database...",
+  "Establishing live metric streams...",
+  "System ready. Welcome to SAJDA Hub."
+];
+
 export default function LaunchPage() {
   const router = useRouter();
-  const [isLaunching, setIsLaunching] = useState(false);
+  const [step, setStep] = useState(0);
+  const [isExiting, setIsExiting] = useState(false);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.code === "Space" || e.key === " ") {
+      if ((e.code === "Space" || e.key === " ") && step === 0) {
         e.preventDefault();
-        if (!isLaunching) {
-          setIsLaunching(true);
-          // A slightly longer, cinematic 1.2s delay for the fade-out
-          setTimeout(() => router.push("/leaderboard"), 1200);
-        }
+        startLaunchSequence();
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isLaunching, router]);
+  }, [step]);
+
+  const startLaunchSequence = () => {
+    if (step > 0) return;
+    
+    // Step 1: Secure Connection
+    setStep(1);
+    
+    // Step 2: Database Sync
+    setTimeout(() => setStep(2), 1000);
+    
+    // Step 3: Live Metrics
+    setTimeout(() => setStep(3), 2000);
+    
+    // Step 4: Completion text
+    setTimeout(() => setStep(4), 3000);
+    
+    // Final Step: Fade out the entire screen and route
+    setTimeout(() => {
+      setIsExiting(true);
+      setTimeout(() => router.push("/"), 800);
+    }, 3800);
+  };
 
   return (
     <div 
-      onClick={() => {
-        if (!isLaunching) {
-          setIsLaunching(true);
-          setTimeout(() => router.push("/leaderboard"), 1200);
-        }
-      }}
-      className={`relative flex min-h-screen w-full cursor-pointer flex-col items-center justify-between overflow-hidden bg-[#020b07] selection:bg-ocean-500/30 transition-all duration-[1200ms] ease-in-out ${
-        isLaunching ? "scale-[1.02] opacity-0 blur-sm" : "scale-100 opacity-100 blur-0"
+      onClick={startLaunchSequence}
+      className={`relative flex min-h-screen w-full cursor-pointer flex-col items-center justify-between overflow-hidden bg-[#020b07] selection:bg-ocean-500/30 transition-all duration-[800ms] ease-in-out ${
+        isExiting ? "scale-[1.02] opacity-0 blur-md" : "scale-100 opacity-100 blur-0"
       }`}
     >
       {/* 
         ========================================
-        SUBTLE, PROFESSIONAL AMBIENCE
+        AMBIENT BACKGROUND & TEXTURE
         ========================================
       */}
-      {/* Deep, sophisticated radial glow */}
-      <div className="absolute left-1/2 top-1/2 -z-10 h-[800px] w-[800px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-ocean-600/10 blur-[120px] transition-opacity duration-1000" />
-      
-      {/* High-end grain texture for depth */}
+      <div className={`absolute left-1/2 top-1/2 -z-10 h-[800px] w-[800px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-ocean-600/10 blur-[120px] transition-all duration-[3000ms] ${step > 0 ? "scale-125 opacity-100 bg-ocean-500/20" : "scale-100 opacity-50"}`} />
       <div className="absolute inset-0 -z-10 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.15] mix-blend-overlay" />
 
       {/* 
@@ -52,7 +71,7 @@ export default function LaunchPage() {
         TOP: BRANDING
         ========================================
       */}
-      <div className="mt-16 flex animate-in fade-in slide-in-from-top-8 duration-1000 flex-col items-center gap-6">
+      <div className={`mt-16 flex animate-in fade-in slide-in-from-top-8 duration-1000 flex-col items-center gap-6 transition-all duration-1000 ${step > 0 ? "opacity-30 blur-[2px]" : "opacity-100"}`}>
         <div className="relative flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md shadow-2xl">
           <Image 
             src="/icon.png" 
@@ -69,7 +88,7 @@ export default function LaunchPage() {
         CENTER: PREMIUM TYPOGRAPHY
         ========================================
       */}
-      <div className="flex flex-col items-center justify-center text-center">
+      <div className={`flex flex-col items-center justify-center text-center transition-all duration-1000 ${step > 0 ? "scale-95 opacity-30 blur-[2px]" : "scale-100 opacity-100"}`}>
         <p className="animate-in fade-in slide-in-from-bottom-4 duration-1000 mb-6 text-[11px] font-medium uppercase tracking-[0.4em] text-white/40">
           Central Committee · 2026—2027
         </p>
@@ -88,22 +107,49 @@ export default function LaunchPage() {
 
       {/* 
         ========================================
-        BOTTOM: SLEEK ACTION PROMPT
+        BOTTOM: SEQUENCED INITIALIZATION UI
         ========================================
       */}
-      <div className="mb-16 flex flex-col items-center animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-700">
-        <div className="group relative flex items-center gap-4 rounded-full border border-white/10 bg-white/5 px-6 py-3 backdrop-blur-md transition-all hover:bg-white/10">
-          <div className={`absolute inset-0 rounded-full bg-ocean-500/20 blur-md transition-opacity duration-500 ${isLaunching ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`} />
-          
-          <span className="relative text-xs font-semibold uppercase tracking-[0.2em] text-white/60">
-            Press
-          </span>
-          <div className="relative flex h-8 items-center justify-center rounded bg-white px-4 shadow-[0_0_15px_rgba(255,255,255,0.3)]">
-            <span className="text-xs font-black uppercase tracking-widest text-[#020b07]">Space</span>
+      <div className="mb-20 flex h-24 flex-col items-center justify-end animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-700">
+        
+        {/* Initial Prompt (Fades out when space is pressed) */}
+        <div className={`group absolute transition-all duration-700 ${step > 0 ? "translate-y-4 opacity-0 pointer-events-none" : "translate-y-0 opacity-100"}`}>
+          <div className="flex items-center gap-4 rounded-full border border-white/10 bg-white/5 px-6 py-3 backdrop-blur-md hover:bg-white/10 transition-colors">
+            <span className="text-xs font-semibold uppercase tracking-[0.2em] text-white/60">Press</span>
+            <div className="flex h-8 items-center justify-center rounded bg-white px-4 shadow-[0_0_15px_rgba(255,255,255,0.3)]">
+              <span className="text-xs font-black uppercase tracking-widest text-[#020b07]">Space</span>
+            </div>
+            <span className="text-xs font-semibold uppercase tracking-[0.2em] text-white/60">To Initialize</span>
           </div>
-          <span className="relative text-xs font-semibold uppercase tracking-[0.2em] text-white/60">
-            To Initialize
-          </span>
+        </div>
+
+        {/* Syncing Progress UI (Fades in when space is pressed) */}
+        <div className={`flex w-64 flex-col items-center gap-5 transition-all duration-700 ${step > 0 ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0 pointer-events-none"}`}>
+          
+          {/* Progress Bar Line */}
+          <div className="h-[2px] w-full overflow-hidden rounded-full bg-white/10">
+            <div 
+              className="h-full bg-ocean-400 transition-all ease-linear"
+              style={{
+                width: step === 0 ? "0%" : step === 1 ? "25%" : step === 2 ? "65%" : step === 3 ? "90%" : "100%",
+                transitionDuration: step === 4 ? "400ms" : "1000ms"
+              }}
+            />
+          </div>
+          
+          {/* Dynamic Console Text */}
+          <div className="flex items-center gap-3">
+            {step > 0 && step < 4 && (
+              <div className="h-1.5 w-1.5 animate-ping rounded-full bg-ocean-400" />
+            )}
+            {step === 4 && (
+              <div className="h-1.5 w-1.5 rounded-full bg-ocean-400 shadow-[0_0_10px_rgba(74,222,128,1)]" />
+            )}
+            <p className="font-mono text-[10px] font-medium uppercase tracking-[0.2em] text-white/70">
+              {BOOT_SEQUENCE[step]}
+            </p>
+          </div>
+
         </div>
       </div>
 
