@@ -48,14 +48,15 @@ export default function MessagesPage() {
     load();
   }, []);
 
-  const stats = useMemo(() => {
-    return {
+  const stats = useMemo(
+    () => ({
       total: rows.length,
       unread: rows.filter((r) => r.status === "unread").length,
       read: rows.filter((r) => r.status === "read").length,
       archived: rows.filter((r) => r.status === "archived").length,
-    };
-  }, [rows]);
+    }),
+    [rows]
+  );
 
   const filtered = useMemo(() => {
     const search = q.trim().toLowerCase();
@@ -85,24 +86,24 @@ export default function MessagesPage() {
     await load();
 
     if (selected?.id === id) {
-      setSelected((x: any) => ({
-        ...x,
+      setSelected((current: any) => ({
+        ...current,
         status: next,
       }));
     }
   };
 
-  const openMessage = (message: any) => {
+  const openMessage = async (message: any) => {
     setSelected(message);
 
     if (message.status === "unread") {
-      update(message.id, "read");
+      await update(message.id, "read");
     }
   };
 
   return (
     <div className="space-y-6 pb-10">
-      {/* Header */}
+      {/* HEADER */}
       <PageHeader
         eyebrow="Communications"
         title="Message inbox"
@@ -123,7 +124,7 @@ export default function MessagesPage() {
         }
       />
 
-      {/* Overview cards */}
+      {/* STATS */}
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <StatCard
           icon={<Inbox size={17} />}
@@ -138,8 +139,8 @@ export default function MessagesPage() {
           label="Unread"
           value={stats.unread}
           active={status === "unread"}
-          onClick={() => setStatus("unread")}
           highlight={stats.unread > 0}
+          onClick={() => setStatus("unread")}
         />
 
         <StatCard
@@ -159,9 +160,9 @@ export default function MessagesPage() {
         />
       </div>
 
-      {/* Main inbox */}
+      {/* INBOX */}
       <Panel className="overflow-hidden p-0">
-        {/* Toolbar */}
+        {/* SEARCH / FILTER */}
         <div className="border-b border-white/[0.06] p-4 sm:p-5">
           <div className="flex flex-col gap-3 lg:flex-row">
             <div className="relative min-w-0 flex-1">
@@ -179,6 +180,7 @@ export default function MessagesPage() {
 
               {q && (
                 <button
+                  type="button"
                   onClick={() => setQ("")}
                   className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1 text-white/30 transition hover:bg-white/5 hover:text-white"
                 >
@@ -207,6 +209,7 @@ export default function MessagesPage() {
 
             {(q || status !== "all") && (
               <button
+                type="button"
                 onClick={() => {
                   setQ("");
                   setStatus("all");
@@ -219,7 +222,7 @@ export default function MessagesPage() {
           </div>
         </div>
 
-        {/* Messages */}
+        {/* MESSAGE LIST */}
         {filtered.length ? (
           <div className="divide-y divide-white/[0.05]">
             {filtered.map((m) => {
@@ -228,6 +231,7 @@ export default function MessagesPage() {
               return (
                 <button
                   key={m.id}
+                  type="button"
                   onClick={() => openMessage(m)}
                   className={[
                     "group relative block w-full px-4 py-4 text-left transition sm:px-5",
@@ -236,13 +240,12 @@ export default function MessagesPage() {
                       : "hover:bg-white/[0.025]",
                   ].join(" ")}
                 >
-                  {/* unread indicator */}
                   {unread && (
                     <span className="absolute left-0 top-0 h-full w-[3px] bg-emerald-500" />
                   )}
 
                   <div className="flex gap-3 sm:gap-4">
-                    {/* Avatar */}
+                    {/* AVATAR */}
                     <div
                       className={[
                         "mt-0.5 grid h-10 w-10 shrink-0 place-items-center rounded-xl border text-xs font-black",
@@ -285,7 +288,7 @@ export default function MessagesPage() {
                         {m.college && ` · ${m.college}`}
                       </div>
 
-                      <div className="mt-3 flex items-center gap-2">
+                      <div className="mt-3">
                         <span
                           className={[
                             "truncate text-xs",
@@ -320,7 +323,7 @@ export default function MessagesPage() {
         )}
       </Panel>
 
-      {/* Message reader */}
+      {/* MESSAGE READER */}
       {selected && (
         <div
           className="fixed inset-0 z-[70] flex items-center justify-center bg-black/75 p-3 backdrop-blur-md sm:p-5"
@@ -331,7 +334,7 @@ export default function MessagesPage() {
           }}
         >
           <div className="flex max-h-[92vh] w-full max-w-3xl flex-col overflow-hidden rounded-[28px] border border-white/10 bg-[#081421] shadow-2xl shadow-black/50">
-            {/* Modal header */}
+            {/* MODAL HEADER */}
             <div className="border-b border-white/[0.07] px-5 py-5 sm:px-7">
               <div className="flex items-start justify-between gap-5">
                 <div className="flex min-w-0 gap-3">
@@ -347,12 +350,15 @@ export default function MessagesPage() {
                     <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-white/35">
                       <span>{selected.name}</span>
                       <span className="text-white/15">•</span>
-                      <span>{selected.email || "No email"}</span>
+                      <span>
+                        {selected.email || "No email"}
+                      </span>
                     </div>
                   </div>
                 </div>
 
                 <button
+                  type="button"
                   onClick={() => setSelected(null)}
                   className="grid h-9 w-9 shrink-0 place-items-center rounded-xl text-white/35 transition hover:bg-white/5 hover:text-white"
                   aria-label="Close"
@@ -377,7 +383,7 @@ export default function MessagesPage() {
               </div>
             </div>
 
-            {/* Message body */}
+            {/* MESSAGE */}
             <div className="min-h-0 flex-1 overflow-y-auto px-5 py-6 sm:px-7 sm:py-7">
               <div className="rounded-2xl border border-white/[0.06] bg-black/15 p-5 sm:p-6">
                 <div className="mb-4 text-[10px] font-black uppercase tracking-[0.16em] text-white/20">
@@ -390,7 +396,7 @@ export default function MessagesPage() {
               </div>
             </div>
 
-            {/* Modal actions */}
+            {/* ACTIONS */}
             <div className="border-t border-white/[0.07] bg-black/10 px-5 py-4 sm:px-7">
               <div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <Button
@@ -398,10 +404,11 @@ export default function MessagesPage() {
                   onClick={() => setSelected(null)}
                   className="gap-2"
                 >
+                  <X size={15} />
                   Close
                 </Button>
 
-                <div className="flex gap-2">
+                <div className="flex flex-wrap justify-end gap-2">
                   {selected.status !== "read" && (
                     <Button
                       variant="ghost"
@@ -416,7 +423,9 @@ export default function MessagesPage() {
                   {selected.status !== "archived" && (
                     <Button
                       variant="danger"
-                      onClick={() => update(selected.id, "archived")}
+                      onClick={() =>
+                        update(selected.id, "archived")
+                      }
                       className="gap-2"
                     >
                       <Archive size={15} />
@@ -434,7 +443,7 @@ export default function MessagesPage() {
 }
 
 /* -------------------------------------------------------
-   Components
+   STAT CARD
 ------------------------------------------------------- */
 
 function StatCard({
@@ -454,6 +463,7 @@ function StatCard({
 }) {
   return (
     <button
+      type="button"
       onClick={onClick}
       className={[
         "group rounded-2xl border p-4 text-left transition",
@@ -479,20 +489,22 @@ function StatCard({
         )}
       </div>
 
-      <div className="mt-4 flex items-end justify-between">
-        <div>
-          <div className="text-[10px] font-black uppercase tracking-[0.14em] text-white/25">
-            {label}
-          </div>
+      <div className="mt-4">
+        <div className="text-[10px] font-black uppercase tracking-[0.14em] text-white/25">
+          {label}
+        </div>
 
-          <div className="mt-1 text-2xl font-black tracking-tight text-white">
-            {value}
-          </div>
+        <div className="mt-1 text-2xl font-black tracking-tight text-white">
+          {value}
         </div>
       </div>
     </button>
   );
 }
+
+/* -------------------------------------------------------
+   STATUS BADGE
+------------------------------------------------------- */
 
 function StatusBadge({ status }: { status?: string }) {
   if (status === "unread") {
@@ -521,6 +533,10 @@ function StatusBadge({ status }: { status?: string }) {
   );
 }
 
+/* -------------------------------------------------------
+   INITIALS
+------------------------------------------------------- */
+
 function getInitials(name?: string) {
   if (!name) return "?";
 
@@ -530,5 +546,7 @@ function getInitials(name?: string) {
     return parts[0].slice(0, 2).toUpperCase();
   }
 
-  return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
+  return `${parts[0][0]}${
+    parts[parts.length - 1][0]
+  }`.toUpperCase();
 }
