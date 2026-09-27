@@ -39,19 +39,19 @@ export async function middleware(request: NextRequest) {
 
   // Protect all /admin routes except the login page
   const isAdminRoute = request.nextUrl.pathname.startsWith('/admin')
-  const isLoginPage = request.nextUrl.pathname === '/admin/login'
+  const isLoginPage = request.nextUrl.pathname === '/login'
 
   if (isAdminRoute && !isLoginPage && !user) {
     // Redirect unauthenticated users to the login page
     const redirectUrl = request.nextUrl.clone()
-    redirectUrl.pathname = '/admin/login'
+    redirectUrl.pathname = '/login'
     return NextResponse.redirect(redirectUrl)
   }
 
   // If a logged-in user tries to visit the login page, send them to the dashboard
   if (isLoginPage && user) {
     const redirectUrl = request.nextUrl.clone()
-    redirectUrl.pathname = '/admin/dashboard'
+    redirectUrl.pathname = '/admin'
     return NextResponse.redirect(redirectUrl)
   }
 
