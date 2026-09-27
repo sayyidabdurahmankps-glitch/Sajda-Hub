@@ -64,15 +64,7 @@ export default function LoginPage() {
           
           {/* Header */}
           <div className="mb-10 flex flex-col items-center text-center">
-            <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-[#F8FAFC] shadow-sm border border-line">
-              <Image 
-                src="/icon.png" 
-                alt="SAJDA Logo" 
-                width={36} 
-                height={36} 
-                className="drop-shadow-sm"
-              />
-            </div>
+            
             <h1 className="mb-2 text-2xl font-black tracking-tight text-ink-950">
               Executive Portal
             </h1>
