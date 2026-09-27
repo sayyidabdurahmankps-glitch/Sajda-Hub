@@ -19,7 +19,7 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  if (pathname?.startsWith("/admin") || pathname?.startsWith("/launch")) {
+  if (pathname?.startsWith("/admin") || pathname?.startsWith("/launch") || pathname?.startsWith("/login")) {
     return null;
   }
 
