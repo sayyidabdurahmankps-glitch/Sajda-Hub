@@ -31,14 +31,11 @@ export default function LoginPage() {
         password,
       });
 
-      if (authError) {
-        throw authError;
-      }
+      if (authError) throw authError;
 
       if (data.session) {
-        // Redirect to the admin dashboard/studio upon successful login
         router.push("/admin");
-        router.refresh(); // Force a refresh to update server components with the new session
+        router.refresh();
       }
     } catch (err: any) {
       setError(err.message || "Failed to sign in. Please check your credentials.");
@@ -48,74 +45,82 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-[85vh] w-full items-center justify-center px-5 py-12 sm:px-8">
+    <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-[#020b07] px-5 py-12 sm:px-8">
       
-      {/* 
-        ========================================
-        LOGIN CARD
-        ========================================
-      */}
-      <div className="relative w-full max-w-md animate-in fade-in slide-in-from-bottom-8 duration-700">
-        
-        {/* Decorative background glow */}
-        <div className="absolute -inset-1 -z-10 rounded-[2.5rem] bg-gradient-to-b from-ocean-500/20 to-transparent blur-xl" />
+      {/* Ambient Background Glows */}
+      <div className="absolute left-1/2 top-1/2 -z-10 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-ocean-600/10 blur-[100px]" />
+      <div className="absolute inset-0 -z-10 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.15] mix-blend-overlay" />
 
-        <div className="overflow-hidden rounded-[2rem] border border-line bg-white p-8 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.05)] sm:p-10">
+      {/* Login Card */}
+      <div className="relative w-full max-w-md animate-in fade-in zoom-in-95 duration-700">
+        
+        {/* Glassmorphic Container */}
+        <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-white/[0.03] p-8 shadow-2xl backdrop-blur-xl sm:p-12">
           
           {/* Header */}
           <div className="mb-10 flex flex-col items-center text-center">
-            
-            <h1 className="mb-2 text-2xl font-black tracking-tight text-ink-950">
+            <div className="mb-6 flex h-20 w-20 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-white/5 shadow-inner">
+              {/* Note: Ensure /icon.png exists in your public folder to fix the broken image */}
+              <Image 
+                src="/icon.png" 
+                alt="SAJDA Logo" 
+                width={48} 
+                height={48} 
+                className="object-contain opacity-90 drop-shadow-[0_0_15px_rgba(34,197,94,0.3)]"
+                onError={(e) => { e.currentTarget.style.display = 'none'; }}
+              />
+            </div>
+            <h1 className="mb-2 text-3xl font-black tracking-tight text-white">
               Executive Portal
             </h1>
-            <p className="text-sm font-medium text-ink-500">
+            <p className="text-xs font-medium leading-relaxed text-white/50">
               Secure access for SAJDA Central Committee and Union Administrators.
             </p>
           </div>
 
           {/* Error Message */}
           {error && (
-            <div className="mb-6 flex items-start gap-3 rounded-xl border border-red-500/20 bg-red-50 p-4 text-red-600 animate-in slide-in-from-top-2">
+            <div className="mb-6 flex items-start gap-3 rounded-2xl border border-red-500/20 bg-red-500/10 p-4 text-red-400 animate-in slide-in-from-top-2">
               <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
-              <p className="text-xs font-bold leading-relaxed">{error}</p>
+              <p className="text-[11px] font-bold leading-relaxed">{error}</p>
             </div>
           )}
 
           {/* Form */}
-          <form onSubmit={handleLogin} className="space-y-5">
+          <form onSubmit={handleLogin} className="space-y-6">
             
             {/* Email Input */}
             <div className="space-y-2">
-              <label className="text-[11px] font-extrabold uppercase tracking-widest text-ink-400">
+              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40">
                 Email Address
               </label>
-              <div className="relative flex items-center">
-                <Mail className="absolute left-4 h-5 w-5 text-ink-400" />
+              <div className="relative flex items-center group">
+                <Mail className="absolute left-4 h-5 w-5 text-white/30 transition-colors group-focus-within:text-ocean-400" />
                 <input
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin@jamianooriya.in"
-                  className="w-full rounded-xl border border-line bg-[#F8FAFC] py-3.5 pl-12 pr-4 text-sm font-bold text-ink-900 outline-none transition-all focus:border-ocean-500 focus:bg-white focus:ring-4 focus:ring-ocean-500/10 placeholder:text-ink-300 placeholder:font-medium"
+                  placeholder="admin email"
+                  className="w-full rounded-2xl border border-white/10 bg-black/20 py-4 pl-12 pr-4 text-sm font-bold text-white outline-none transition-all focus:border-ocean-500/50 focus:bg-white/5 focus:ring-4 focus:ring-ocean-500/10 placeholder:text-white/20"
                 />
               </div>
             </div>
 
             {/* Password Input */}
             <div className="space-y-2">
-              <label className="text-[11px] font-extrabold uppercase tracking-widest text-ink-400">
+              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40">
                 Password
               </label>
-              <div className="relative flex items-center">
-                <Lock className="absolute left-4 h-5 w-5 text-ink-400" />
+              <div className="relative flex items-center group">
+                <Lock className="absolute left-4 h-5 w-5 text-white/30 transition-colors group-focus-within:text-ocean-400" />
                 <input
                   type="password"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="w-full rounded-xl border border-line bg-[#F8FAFC] py-3.5 pl-12 pr-4 text-sm font-bold text-ink-900 outline-none transition-all focus:border-ocean-500 focus:bg-white focus:ring-4 focus:ring-ocean-500/10 placeholder:text-ink-300 placeholder:font-medium"
+                  placeholder="••••••••••••"
+                  className="w-full rounded-2xl border border-white/10 bg-black/20 py-4 pl-12 pr-4 text-sm font-bold text-white outline-none transition-all focus:border-ocean-500/50 focus:bg-white/5 focus:ring-4 focus:ring-ocean-500/10 placeholder:text-white/20"
                 />
               </div>
             </div>
@@ -124,31 +129,30 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="group relative mt-4 flex w-full items-center justify-center gap-3 rounded-xl bg-ocean-600 py-4 text-sm font-black uppercase tracking-widest text-white transition-all hover:bg-ocean-500 hover:shadow-[0_0_20px_rgba(34,197,94,0.3)] disabled:opacity-70 disabled:pointer-events-none"
+              className="group relative mt-8 flex w-full items-center justify-center gap-3 rounded-2xl bg-ocean-600 py-4 text-xs font-black uppercase tracking-widest text-white transition-all hover:bg-ocean-500 hover:shadow-[0_0_30px_rgba(34,197,94,0.3)] disabled:opacity-50 disabled:pointer-events-none"
             >
               {isLoading ? (
                 <>
                   <Loader2 className="h-5 w-5 animate-spin" />
-                  Authenticating
+                  Authenticating...
                 </>
               ) : (
                 <>
                   <ShieldCheck className="h-5 w-5 text-ocean-200" />
                   Secure Login
-                  <ArrowRight className="absolute right-6 h-4 w-4 opacity-0 transition-all group-hover:right-4 group-hover:opacity-100" />
+                  <ArrowRight className="absolute right-6 h-4 w-4 opacity-0 transition-all group-hover:right-5 group-hover:opacity-100" />
                 </>
               )}
             </button>
-
           </form>
 
           {/* Footer Link */}
-          <div className="mt-8 text-center border-t border-line pt-6">
+          <div className="mt-8 border-t border-white/5 pt-8 text-center">
             <Link 
               href="/"
-              className="text-xs font-bold text-ink-400 transition-colors hover:text-ocean-600"
+              className="text-[11px] font-bold tracking-wider text-white/30 transition-colors hover:text-white"
             >
-              &larr; Return to Public Site
+              &larr; RETURN TO PUBLIC SITE
             </Link>
           </div>
 

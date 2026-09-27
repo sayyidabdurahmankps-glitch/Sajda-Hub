@@ -34,8 +34,8 @@ export const metadata: Metadata = {
     follow: true,
   },
   icons: {
-    icon: "/favicon.png",
-    apple: "/favicon.png",
+    icon: "/favicon.ico",
+    apple: "/favicon.ico",
   },
   // Added Google Search Console Verification here!
   verification: {
@@ -47,17 +47,29 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  
+  // This is the direct message to Google's Search Bots
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "SAJDA Union",
+    "alternateName": "SAJDA Central Committee",
+    "url": "https://sajda-union.vercel.app",
+  };
+
   return (
     <html lang="en">
-      {/* 
-        Added min-h-screen and flex-col so the footer always 
-        pushes cleanly to the bottom of the page.
-      */}
+      <head>
+        {/* Inject the Structured Data for Google */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
       <body className="flex min-h-screen flex-col bg-[#F8FAFC] text-ink-950 antialiased selection:bg-ocean-500/30 selection:text-ocean-900">
         <Navbar />
         
-        {/* Main content wrapper */}
-        <div className="flex-grow">
+       <div className="flex-grow">
           {children}
         </div>
 
