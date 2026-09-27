@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -27,9 +28,8 @@ import {
   ExternalLink,
 } from "lucide-react";
 
-// Make sure this path points to your actual supabase client file!
-import { supabase } from "../lib/supabase";
-import HeadToHead from "../components/HeadToHead";
+import { supabase } from "../../lib/supabase";
+import HeadToHead from "../../components/HeadToHead";
 
 /* =========================================================
    WINGS
@@ -186,8 +186,9 @@ export default function HomePage() {
 
   // Contact Form State
   const [isSubmitting, setIsSubmitting] = useState(false);
+
   const [submitStatus, setSubmitStatus] = useState<
-    "idle" | "success" | "error"
+    "idle" | "success" | "error" | null
   >("idle");
 
   const fullText =
@@ -257,7 +258,9 @@ export default function HomePage() {
      CONTACT FORM
   ========================================================= */
 
-  const handleSendMessage = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSendMessage = async (
+    e: React.FormEvent<HTMLFormElement>
+  ) => {
     e.preventDefault();
 
     setIsSubmitting(true);
@@ -266,14 +269,16 @@ export default function HomePage() {
     const formData = new FormData(e.currentTarget);
 
     const payload = {
-      name: String(formData.get("name")),
-      college: String(formData.get("college")),
-      email: String(formData.get("email")),
-      message: String(formData.get("message")),
+      name: String(formData.get("name") ?? ""),
+      college: String(formData.get("college") ?? ""),
+      email: String(formData.get("email") ?? ""),
+      message: String(formData.get("message") ?? ""),
       status: "unread",
     };
 
-    const { error } = await supabase.from("contact_messages").insert(payload);
+    const { error } = await supabase
+      .from("contact_messages")
+      .insert(payload);
 
     if (error) {
       console.error("Message Error:", error);
@@ -282,7 +287,9 @@ export default function HomePage() {
       setSubmitStatus("success");
       e.currentTarget.reset();
 
-      setTimeout(() => setSubmitStatus("idle"), 5000);
+      setTimeout(() => {
+        setSubmitStatus("idle");
+      }, 5000);
     }
 
     setIsSubmitting(false);
@@ -310,11 +317,14 @@ export default function HomePage() {
                   {announcement.title}:
                 </span>
 
-                <span className="text-white/90">{announcement.body}</span>
+                <span className="text-white/90">
+                  {announcement.body}
+                </span>
               </span>
             </div>
 
             <button
+              type="button"
               onClick={() => setShowAnnouncement(false)}
               className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-white/50 transition-colors hover:bg-white/10 hover:text-white sm:right-6"
               aria-label="Dismiss announcement"
@@ -323,6 +333,7 @@ export default function HomePage() {
             </button>
           </div>
         )}
+
         {/* =====================================================
             HERO
         ====================================================== */}
@@ -371,7 +382,9 @@ export default function HomePage() {
                 }`}
               >
                 Where unions{" "}
-                <span className="block text-ocean-800">grow together.</span>
+                <span className="block text-ocean-800">
+                  grow together.
+                </span>
               </h1>
 
               <p className="mt-8 min-h-[64px] max-w-2xl text-[16px] font-bold leading-8 text-[#526579] sm:text-xl">
@@ -434,6 +447,7 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+
         {/* =====================================================
             QUICK STATS
         ====================================================== */}
@@ -466,7 +480,9 @@ export default function HomePage() {
                   <div
                     key={item.title}
                     className={`group flex items-center gap-5 border-line p-6 transition-colors hover:bg-ocean-50/50 sm:p-8 ${
-                      index !== 2 ? "border-b md:border-b-0 md:border-r" : ""
+                      index !== 2
+                        ? "border-b md:border-b-0 md:border-r"
+                        : ""
                     }`}
                   >
                     <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-ocean-100 text-ocean-800 transition-transform group-hover:scale-110">
@@ -492,6 +508,7 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+
         {/* =====================================================
             WINGS
         ====================================================== */}
@@ -504,7 +521,9 @@ export default function HomePage() {
 
               <h2 className="mt-3 text-4xl font-black tracking-[-0.03em] text-ocean-950 sm:text-5xl lg:text-6xl">
                 One union.{" "}
-                <span className="block text-ocean-700">Four dimensions.</span>
+                <span className="block text-ocean-700">
+                  Four dimensions.
+                </span>
               </h2>
             </div>
 
@@ -520,6 +539,7 @@ export default function HomePage() {
             ))}
           </div>
         </section>
+
         {/* =====================================================
             FEATURE SECTION
         ====================================================== */}
@@ -586,6 +606,7 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+
         {/* =====================================================
             HOW IT WORKS
         ====================================================== */}
@@ -605,7 +626,11 @@ export default function HomePage() {
               <div className="absolute left-[12%] right-[12%] top-8 hidden h-0.5 bg-ocean-100 md:block" />
 
               {[
-                ["01", "Union", "Establish the yearly union and committee."],
+                [
+                  "01",
+                  "Union",
+                  "Establish the yearly union and committee.",
+                ],
                 [
                   "02",
                   "Programs",
@@ -616,7 +641,11 @@ export default function HomePage() {
                   "Metrics",
                   "Maintain structured union performance data.",
                 ],
-                ["04", "Insight", "See the live Best Union Award leaderboard."],
+                [
+                  "04",
+                  "Insight",
+                  "See the live Best Union Award leaderboard.",
+                ],
               ].map(([number, title, text]) => (
                 <div key={number} className="group relative text-center">
                   <div className="relative mx-auto flex h-16 w-16 items-center justify-center rounded-2xl border-2 border-ocean-200 bg-white text-base font-black text-ocean-800 shadow-ocean-sm transition-transform duration-300 group-hover:-translate-y-1.5 group-hover:shadow-ocean-md">
@@ -635,306 +664,337 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+
         {/* =====================================================
             HEAD-TO-HEAD COMPARISON
         ====================================================== */}
         <HeadToHead />
+
         {/* =====================================================
             CONTACT SECTION
         ====================================================== */}
         <section className="relative overflow-hidden bg-white py-24 sm:py-32">
-  <div className="pointer-events-none absolute -left-40 top-20 h-80 w-80 rounded-full bg-ocean-100/30 blur-3xl" />
-  <div className="pointer-events-none absolute -right-40 bottom-0 h-96 w-96 rounded-full bg-ocean-100/30 blur-3xl" />
+          <div className="pointer-events-none absolute -left-40 top-20 h-80 w-80 rounded-full bg-ocean-100/30 blur-3xl" />
+          <div className="pointer-events-none absolute -right-40 bottom-0 h-96 w-96 rounded-full bg-ocean-100/30 blur-3xl" />
 
-  <div className="relative mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
-    <div className="grid gap-16 lg:grid-cols-2 lg:gap-24">
-      <div>
-        <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-ocean-600">
-          Get in Touch
-        </p>
+          <div className="relative mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
+            <div className="grid gap-16 lg:grid-cols-2 lg:gap-24">
+              <div>
+                <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-ocean-600">
+                  Get in Touch
+                </p>
 
-        <h2 className="mt-3 text-4xl font-black tracking-tight text-ocean-950 sm:text-5xl">
-          Reach out to the Central Committee.
-        </h2>
+                <h2 className="mt-3 text-4xl font-black tracking-tight text-ocean-950 sm:text-5xl">
+                  Reach out to the Central Committee.
+                </h2>
 
-        <p className="mt-6 text-base font-medium leading-8 text-[#526579]">
-          Have questions regarding union coordination, program updates,
-          academic-year records, or leaderboard synchronization? Reach
-          the SAJDA Central Committee through the official contact
-          channels below.
-        </p>
+                <p className="mt-6 text-base font-medium leading-8 text-[#526579]">
+                  Have questions regarding union coordination, program
+                  updates, academic-year records, or leaderboard
+                  synchronization? Reach the SAJDA Central Committee through
+                  the official contact channels below.
+                </p>
 
-        <div className="mt-12 grid gap-4 sm:grid-cols-2">
-          <a
-            href="https://www.google.com/maps/search/?api=1&query=Jamia+Nooriya+Arabic+College%2C+Faizabad%2C+Pattikkad%2C+Perinthalmanna%2C+Malappuram%2C+Kerala+679325"
-            target="_blank"
-            rel="noreferrer"
-            className="group rounded-2xl border border-line bg-white p-5 transition-all duration-300 hover:-translate-y-1 hover:border-ocean-200 hover:shadow-ocean-md"
-          >
-            <div className="flex items-start gap-4">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-ocean-50 text-ocean-800 transition-transform group-hover:scale-105">
-                <MapPin size={21} strokeWidth={2.5} />
+                <div className="mt-12 grid gap-4 sm:grid-cols-2">
+                  {/* CENTRAL OFFICE */}
+                  <a
+                    href="https://www.google.com/maps/search/?api=1&query=Jamia+Nooriya+Arabic+College%2C+Faizabad%2C+Pattikkad%2C+Perinthalmanna%2C+Malappuram%2C+Kerala+679325"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="group rounded-2xl border border-line bg-white p-5 transition-all duration-300 hover:-translate-y-1 hover:border-ocean-200 hover:shadow-ocean-md"
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-ocean-50 text-ocean-800 transition-transform group-hover:scale-105">
+                        <MapPin size={21} strokeWidth={2.5} />
+                      </div>
+
+                      <div className="min-w-0">
+                        <div className="flex items-center justify-between gap-3">
+                          <h3 className="text-sm font-extrabold text-ocean-950">
+                            Central Office
+                          </h3>
+
+                          <ExternalLink
+                            size={14}
+                            className="text-ink-400 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+                          />
+                        </div>
+
+                        <p className="mt-1 text-xs font-medium leading-5 text-ink-600">
+                          SAJDA Central Committee
+                          <br />
+                          Jamia Nooriya Arabic College
+                          <br />
+                          Faizabad, Pattikkad P.O., Perinthalmanna
+                          <br />
+                          Malappuram, Kerala — 679325
+                        </p>
+                      </div>
+                    </div>
+                  </a>
+
+                  {/* CONTACT NUMBERS */}
+                  <div className="rounded-2xl border border-line bg-white p-5 transition-all duration-300 hover:-translate-y-1 hover:border-ocean-200 hover:shadow-ocean-md">
+                    <div className="flex items-start gap-4">
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-ocean-50 text-ocean-800">
+                        <Phone size={21} strokeWidth={2.5} />
+                      </div>
+
+                      <div className="min-w-0">
+                        <h3 className="text-sm font-extrabold text-ocean-950">
+                          Contact Numbers
+                        </h3>
+
+                        <div className="mt-1 flex flex-col gap-1 text-xs font-bold leading-5 text-ink-600">
+                          <a
+                            href="tel:+919847070200"
+                            className="transition hover:text-ocean-700"
+                          >
+                            +91 98470 70200
+                          </a>
+
+                          <a
+                            href="tel:+919747399584"
+                            className="transition hover:text-ocean-700"
+                          >
+                            +91 97473 99584
+                          </a>
+
+                          <span className="pt-1 text-ink-500">
+                            Landline: 04933 235 917 / 04933 235 620
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* EMAIL ADDRESSES */}
+                  <div className="rounded-2xl border border-line bg-white p-5 transition-all duration-300 hover:-translate-y-1 hover:border-ocean-200 hover:shadow-ocean-md">
+                    <div className="flex items-start gap-4">
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-ocean-50 text-ocean-800">
+                        <Mail size={21} strokeWidth={2.5} />
+                      </div>
+
+                      <div className="min-w-0">
+                        <h3 className="text-sm font-extrabold text-ocean-950">
+                          Email Addresses
+                        </h3>
+
+                        <div className="mt-1 flex flex-col gap-1.5 text-xs font-bold leading-5">
+                          <a
+                            href="mailto:jamianooriya@gmail.com"
+                            className="break-all text-ink-600 transition hover:text-ocean-700"
+                          >
+                            jamianooriya@gmail.com
+                          </a>
+
+                          <a
+                            href="mailto:jamiajuniorcolleges@gmail.com"
+                            className="break-all text-ink-600 transition hover:text-ocean-700"
+                          >
+                            jamiajuniorcolleges@gmail.com
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* SOCIAL CHANNELS */}
+                  <div className="rounded-2xl border border-line bg-white p-5 transition-all duration-300 hover:-translate-y-1 hover:border-ocean-200 hover:shadow-ocean-md">
+                    <div className="flex items-start gap-4">
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-ocean-50 text-ocean-800">
+                        <Globe2 size={21} strokeWidth={2.5} />
+                      </div>
+
+                      <div className="min-w-0">
+                        <h3 className="text-sm font-extrabold text-ocean-950">
+                          Official Social Channels
+                        </h3>
+
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          <span className="inline-flex items-center gap-1.5 rounded-full border border-line bg-ocean-50 px-3 py-1.5 text-[11px] font-extrabold text-ocean-800">
+                            <FaFacebook size={13} />
+                            SAJDA Central Committee
+                          </span>
+
+                          <a
+                            href="https://instagram.com/sajda_central_committee"
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-1.5 rounded-full border border-line bg-ocean-50 px-3 py-1.5 text-[11px] font-extrabold text-ocean-800 transition hover:border-ocean-200 hover:bg-ocean-100"
+                          >
+                            <FaInstagram size={13} />
+                            @sajda_central_committee
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              <div className="min-w-0">
-                <div className="flex items-center justify-between gap-3">
-                  <h3 className="text-sm font-extrabold text-ocean-950">
-                    Central Office
-                  </h3>
+              {/* =================================================
+                  CONTACT FORM
+              ================================================== */}
+              <div className="relative overflow-hidden rounded-[2.5rem] border border-line bg-ocean-50/50 p-8 sm:p-10">
+                <form
+                  className="relative z-10 flex flex-col gap-6"
+                  onSubmit={handleSendMessage}
+                >
+                  {/* ERROR MESSAGE */}
+                  {submitStatus === "error" && (
+                    <div className="mb-2 flex items-center gap-2 rounded-xl bg-red-500/10 p-4 text-sm font-extrabold text-red-600">
+                      <X size={18} />
+                      Error sending message. Please try again.
+                    </div>
+                  )}
 
-                  <ExternalLink
-                    size={14}
-                    className="text-ink-400 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+                  {/* NAME + COLLEGE */}
+                  <div className="grid gap-6 sm:grid-cols-2">
+                    <div className="flex flex-col gap-2">
+                      <label
+                        htmlFor="contact-name"
+                        className="text-[11px] font-extrabold uppercase tracking-wide text-ink-500"
+                      >
+                        Full Name
+                      </label>
+
+                      <input
+                        id="contact-name"
+                        name="name"
+                        required
+                        type="text"
+                        autoComplete="name"
+                        placeholder="Your name"
+                        className="rounded-xl border border-line bg-white px-4 py-3.5 text-sm font-bold text-ocean-950 outline-none transition-colors placeholder:text-ink-300 focus:border-ocean-400"
+                      />
+                    </div>
+
+                    <div className="flex flex-col gap-2">
+                      <label
+                        htmlFor="contact-college"
+                        className="text-[11px] font-extrabold uppercase tracking-wide text-ink-500"
+                      >
+                        Union / College
+                      </label>
+
+                      <input
+                        id="contact-college"
+                        name="college"
+                        type="text"
+                        autoComplete="organization"
+                        placeholder="College name"
+                        className="rounded-xl border border-line bg-white px-4 py-3.5 text-sm font-bold text-ocean-950 outline-none transition-colors placeholder:text-ink-300 focus:border-ocean-400"
+                      />
+                    </div>
+                  </div>
+
+                  {/* EMAIL */}
+                  <div className="flex flex-col gap-2">
+                    <label
+                      htmlFor="contact-email"
+                      className="text-[11px] font-extrabold uppercase tracking-wide text-ink-500"
+                    >
+                      Email Address
+                    </label>
+
+                    <input
+                      id="contact-email"
+                      name="email"
+                      required
+                      type="email"
+                      autoComplete="email"
+                      placeholder="you@example.com"
+                      className="rounded-xl border border-line bg-white px-4 py-3.5 text-sm font-bold text-ocean-950 outline-none transition-colors placeholder:text-ink-300 focus:border-ocean-400"
+                    />
+                  </div>
+
+                  {/* MESSAGE */}
+                  <div className="flex flex-col gap-2">
+                    <label
+                      htmlFor="contact-message"
+                      className="text-[11px] font-extrabold uppercase tracking-wide text-ink-500"
+                    >
+                      Message
+                    </label>
+
+                    <textarea
+                      id="contact-message"
+                      name="message"
+                      required
+                      rows={5}
+                      placeholder="How can we help you?"
+                      className="resize-none rounded-xl border border-line bg-white px-4 py-3.5 text-sm font-bold text-ocean-950 outline-none transition-colors placeholder:text-ink-300 focus:border-ocean-400"
+                    />
+                  </div>
+
+                  {/* SUBMIT */}
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="group mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-ocean-950 py-4 text-sm font-extrabold text-white transition-all hover:bg-ocean-800 disabled:cursor-not-allowed disabled:opacity-70"
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Loader2
+                          size={16}
+                          className="animate-spin"
+                        />
+                        Sending...
+                      </>
+                    ) : (
+                      <>
+                        Send Message
+                        <Send
+                          size={16}
+                          strokeWidth={2.5}
+                          className="transition-transform group-hover:translate-x-1 group-hover:-translate-y-1"
+                        />
+                      </>
+                    )}
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          {/* =====================================================
+              SUCCESS POPUP
+          ====================================================== */}
+          {submitStatus === "success" && (
+            <div className="pointer-events-none fixed inset-x-0 top-5 z-[9999] flex justify-center px-4">
+              <div className="pointer-events-auto flex w-full max-w-md items-center gap-4 rounded-2xl border border-emerald-200 bg-white px-5 py-4 shadow-[0_20px_60px_rgba(0,0,0,0.18)] animate-in slide-in-from-top-5 fade-in duration-300">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+                  <CheckCircle2
+                    size={22}
+                    strokeWidth={2.5}
                   />
                 </div>
 
-                <p className="mt-1 text-xs font-medium leading-5 text-ink-600">
-                  SAJDA Central Committee
-                  <br />
-                  Jamia Nooriya Arabic College
-                  <br />
-                  Faizabad, Pattikkad P.O., Perinthalmanna
-                  <br />
-                  Malappuram, Kerala — 679325
-                </p>
-              </div>
-            </div>
-          </a>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-black text-ocean-950">
+                    Message sent successfully
+                  </p>
 
-          <div className="rounded-2xl border border-line bg-white p-5 transition-all duration-300 hover:-translate-y-1 hover:border-ocean-200 hover:shadow-ocean-md">
-            <div className="flex items-start gap-4">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-ocean-50 text-ocean-800">
-                <Phone size={21} strokeWidth={2.5} />
-              </div>
-
-              <div className="min-w-0">
-                <h3 className="text-sm font-extrabold text-ocean-950">
-                  Contact Numbers
-                </h3>
-
-                <div className="mt-1 flex flex-col gap-1 text-xs font-bold leading-5 text-ink-600">
-                  <a
-                    href="tel:+919847070200"
-                    className="transition hover:text-ocean-700"
-                  >
-                    +91 98470 70200
-                  </a>
-
-                  <a
-                    href="tel:+919747399584"
-                    className="transition hover:text-ocean-700"
-                  >
-                    +91 97473 99584
-                  </a>
-
-                  <span className="pt-1 text-ink-500">
-                    Landline: 04933 235 917 / 04933 235 620
-                  </span>
+                  <p className="mt-0.5 text-xs font-medium text-ink-500">
+                    Your message has been delivered to the Central
+                    Committee.
+                  </p>
                 </div>
+
+                <button
+                  type="button"
+                  onClick={() => setSubmitStatus(null)}
+                  className="shrink-0 rounded-lg p-1.5 text-ink-400 transition hover:bg-slate-100 hover:text-ocean-950"
+                  aria-label="Close notification"
+                >
+                  <X size={16} />
+                </button>
               </div>
-            </div>
-          </div>
-
-          <div className="rounded-2xl border border-line bg-white p-5 transition-all duration-300 hover:-translate-y-1 hover:border-ocean-200 hover:shadow-ocean-md">
-            <div className="flex items-start gap-4">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-ocean-50 text-ocean-800">
-                <Mail size={21} strokeWidth={2.5} />
-              </div>
-
-              <div className="min-w-0">
-                <h3 className="text-sm font-extrabold text-ocean-950">
-                  Email Addresses
-                </h3>
-
-                <div className="mt-1 flex flex-col gap-1.5 text-xs font-bold leading-5">
-                  <a
-                    href="mailto:jamianooriya@gmail.com"
-                    className="break-all text-ink-600 transition hover:text-ocean-700"
-                  >
-                    jamianooriya@gmail.com
-                  </a>
-
-                  <a
-                    href="mailto:jamiajuniorcolleges@gmail.com"
-                    className="break-all text-ink-600 transition hover:text-ocean-700"
-                  >
-                    jamiajuniorcolleges@gmail.com
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-2xl border border-line bg-white p-5 transition-all duration-300 hover:-translate-y-1 hover:border-ocean-200 hover:shadow-ocean-md">
-            <div className="flex items-start gap-4">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-ocean-50 text-ocean-800">
-                <Globe2 size={21} strokeWidth={2.5} />
-              </div>
-
-              <div className="min-w-0">
-                <h3 className="text-sm font-extrabold text-ocean-950">
-                  Official Social Channels
-                </h3>
-
-                <div className="mt-2 flex flex-wrap gap-2">
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-line bg-ocean-50 px-3 py-1.5 text-[11px] font-extrabold text-ocean-800">
-                    <FaFacebook size={13} />
-                    SAJDA Central Committee
-                  </span>
-
-                  <a
-                    href="https://instagram.com/sajda_central_committee"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center gap-1.5 rounded-full border border-line bg-ocean-50 px-3 py-1.5 text-[11px] font-extrabold text-ocean-800 transition hover:border-ocean-200 hover:bg-ocean-100"
-                  >
-                    <FaInstagram size={13} />
-                    @sajda_central_committee
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* CONTACT FORM */}
-      <div className="relative overflow-hidden rounded-[2.5rem] border border-line bg-ocean-50/50 p-8 sm:p-10">
-        <form
-          className="relative z-10 flex flex-col gap-6"
-          onSubmit={handleSendMessage}
-        >
-          {/* ERROR MESSAGE ONLY */}
-          {submitStatus === "error" && (
-            <div className="mb-2 flex items-center gap-2 rounded-xl bg-red-500/10 p-4 text-sm font-extrabold text-red-600">
-              <X size={18} />
-              Error sending message. Please try again.
             </div>
           )}
-
-          <div className="grid gap-6 sm:grid-cols-2">
-            <div className="flex flex-col gap-2">
-              <label className="text-[11px] font-extrabold uppercase tracking-wide text-ink-500">
-                Full Name
-              </label>
-
-              <input
-                name="name"
-                required
-                type="text"
-                placeholder="Your name"
-                className="rounded-xl border border-line bg-white px-4 py-3.5 text-sm font-bold text-ocean-950 outline-none transition-colors focus:border-ocean-400"
-              />
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <label className="text-[11px] font-extrabold uppercase tracking-wide text-ink-500">
-                Union / College
-              </label>
-
-              <input
-                name="college"
-                type="text"
-                placeholder="College name"
-                className="rounded-xl border border-line bg-white px-4 py-3.5 text-sm font-bold text-ocean-950 outline-none transition-colors focus:border-ocean-400"
-              />
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <label className="text-[11px] font-extrabold uppercase tracking-wide text-ink-500">
-              Email Address
-            </label>
-
-            <input
-              name="email"
-              required
-              type="email"
-              placeholder="you@example.com"
-              className="rounded-xl border border-line bg-white px-4 py-3.5 text-sm font-bold text-ocean-950 outline-none transition-colors focus:border-ocean-400"
-            />
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <label className="text-[11px] font-extrabold uppercase tracking-wide text-ink-500">
-              Message
-            </label>
-
-            <textarea
-              name="message"
-              required
-              rows={4}
-              placeholder="How can we help you?"
-              className="resize-none rounded-xl border border-line bg-white px-4 py-3.5 text-sm font-bold text-ocean-950 outline-none transition-colors focus:border-ocean-400"
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="group mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-ocean-950 py-4 text-sm font-extrabold text-white transition-all hover:bg-ocean-800 disabled:cursor-not-allowed disabled:opacity-70"
-          >
-            {isSubmitting ? (
-              <>
-                <Loader2 size={16} className="animate-spin" />
-                Sending...
-              </>
-            ) : (
-              <>
-                Send Message
-                <Send
-                  size={16}
-                  strokeWidth={2.5}
-                  className="transition-transform group-hover:translate-x-1 group-hover:-translate-y-1"
-                />
-              </>
-            )}
-          </button>
-        </form>
-      </div>
-    </div>
-  </div>
-
-  {/* SUCCESS POPUP */}
-  {submitStatus === "success" && (
-    <div className="pointer-events-none fixed inset-x-0 top-5 z-[9999] flex justify-center px-4">
-      <div
-        className="
-          pointer-events-auto
-          flex w-full max-w-md items-center gap-4
-          rounded-2xl border border-emerald-200
-          bg-white px-5 py-4
-          shadow-[0_20px_60px_rgba(0,0,0,0.18)]
-          animate-in slide-in-from-top-5 fade-in duration-300
-        "
-      >
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
-          <CheckCircle2 size={22} strokeWidth={2.5} />
-        </div>
-
-        <div className="min-w-0 flex-1">
-          <p className="text-sm font-black text-ocean-950">
-            Message sent successfully
-          </p>
-
-          <p className="mt-0.5 text-xs font-medium text-ink-500">
-            Your message has been delivered to the Central Committee.
-          </p>
-        </div>
-
-        <button
-          type="button"
-          onClick={() => setSubmitStatus(null)}
-          className="shrink-0 rounded-lg p-1.5 text-ink-400 transition hover:bg-slate-100 hover:text-ocean-950"
-          aria-label="Close notification"
-        >
-          <X size={16} />
-        </button>
-      </div>
-    </div>
-  )}
-</section>
-              </main>
+        </section>
+      </main>
     </>
   );
 }

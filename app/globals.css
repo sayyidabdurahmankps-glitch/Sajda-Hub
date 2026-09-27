@@ -1,41 +1,117 @@
+
 @import "tailwindcss";
 
+/* =========================================================
+   ANEK MALAYALAM — LOCAL FONT
+   Automatically used for Malayalam Unicode characters.
+   
+   File:
+   /public/fonts/AnekMalayalam-Variable.ttf
+========================================================= */
+
+@font-face {
+  font-family: "Anek Malayalam Local";
+  src: url("/fonts/AnekMalayalam-Variable.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 100 800;
+  font-display: swap;
+  unicode-range: U+0D00-0D7F;
+}
+
 @theme {
-  /* 
-    Medium Green Palette 
+  /*
+    Medium Green Palette
     (Vibrant and balanced, avoiding overly dark or pale extremes)
   */
+
   --color-ocean-50: #f0fdf4;
   --color-ocean-100: #dcfce7;
   --color-ocean-200: #bbf7d0;
   --color-ocean-300: #86efac;
   --color-ocean-400: #4ade80;
-  --color-ocean-500: #22c55e;  /* True medium green */
+  --color-ocean-500: #22c55e;
   --color-ocean-600: #16a34a;
   --color-ocean-700: #15803d;
   --color-ocean-800: #166534;
   --color-ocean-900: #14532d;
-  --color-ocean-950: #052e16;  /* Deepest contrast for backgrounds */
+  --color-ocean-950: #052e16;
 
   /* Updated Sage for consistency if still used in the Navbar */
   --color-sage-950: #166534;
 
   /* Ink Palette (Text) */
-  --color-ink-500: #64748B;
+  --color-ink-500: #64748b;
   --color-ink-600: #475569;
-  --color-ink-900: #0F172A;
-  --color-ink-950: #0B1726;
+  --color-ink-900: #0f172a;
+  --color-ink-950: #0b1726;
 
   /* Structural Colors */
-  --color-line: #E2E8F0;
-  --color-line-strong: #CBD5E1;
+  --color-line: #e2e8f0;
+  --color-line-strong: #cbd5e1;
 
   /* Custom Shadows tinted to the new medium green */
   --shadow-ocean-sm: 0 4px 20px 0 rgba(22, 163, 74, 0.08);
   --shadow-ocean-md: 0 12px 30px 0 rgba(22, 163, 74, 0.15);
 }
 
+/* =========================================================
+   GLOBAL TYPOGRAPHY
+========================================================= */
+
+html,
 body {
-  background-color: #F8FAFC;
+  font-family:
+    "Anek Malayalam Local",
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+
+  background-color: #f8fafc;
   color: var(--color-ink-950);
 }
+
+/* =========================================================
+   FORM ELEMENTS
+   Keep browser controls consistent with the site font.
+========================================================= */
+
+button,
+input,
+textarea,
+select {
+  font-family: inherit;
+}
+
+/* =========================================================
+   MALAYALAM TEXT HELPERS
+========================================================= */
+
+/*
+  This class is optional.
+
+  Since the @font-face already uses:
+  unicode-range: U+0D00-0D7F
+
+  Malayalam characters automatically use Anek Malayalam.
+*/
+
+.font-malayalam {
+  font-family:
+    "Anek Malayalam Local",
+    ui-sans-serif,
+    system-ui,
+    sans-serif;
+}
+
+/* =========================================================
+   SMOOTH FONT RENDERING
+========================================================= */
+
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
