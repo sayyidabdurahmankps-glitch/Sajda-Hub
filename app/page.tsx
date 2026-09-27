@@ -28,8 +28,8 @@ import {
   ExternalLink,
 } from "lucide-react";
 
-import { supabase } from "../../lib/supabase";
-import HeadToHead from "../../components/HeadToHead";
+import { supabase } from "../lib/supabase";
+import HeadToHead from "../components/HeadToHead";
 
 /* =========================================================
    WINGS
