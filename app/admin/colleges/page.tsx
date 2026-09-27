@@ -93,12 +93,14 @@ export default function CollegesPage() {
         if (colErr) throw new Error(`College Insert Failed: ${colErr.message}`);
         if (!newCollege?.id) throw new Error("Database did not return a new College ID.");
 
-        // 2. Insert into college_unions (using exact required fields)
-        const { error: unionErr } = await supabase.from("college_unions").insert({
+        // 2. UPSERT into college_unions (Bypasses the duplicate constraint error safely)
+        const { error: unionErr } = await supabase.from("college_unions").upsert({
           college_id: newCollege.id,
           union_name: payload.union_name,
           academic_year: "2026-27",
           status: payload.status
+        }, {
+          onConflict: "college_id,academic_year,union_name"
         });
         
         if (unionErr) throw new Error(`Union Insert Failed: ${unionErr.message}`);
