@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { supabase } from "../lib/supabase"; // Ensure this path points to your supabase client
+import { supabase } from "../lib/supabase"; 
 import {
   Activity,
   Swords,
@@ -9,10 +9,10 @@ import {
   Lock,
   Search,
   Trophy,
-  ShieldCheck
+  ShieldCheck,
+  Loader2
 } from "lucide-react";
 
-// The shape of our Supabase data
 interface UnionData {
   union_id: string;
   name: string;
@@ -27,15 +27,16 @@ export default function HeadToHead() {
   const [unionsList, setUnionsList] = useState<UnionData[]>([]);
   const [unionA, setUnionA] = useState<UnionData | null>(null);
   const [unionB, setUnionB] = useState<UnionData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   
   const [searchA, setSearchA] = useState("");
   const [searchB, setSearchB] = useState("");
   const [isDropdownA, setIsDropdownA] = useState(false);
   const [isDropdownB, setIsDropdownB] = useState(false);
 
-  // Fetch data from Supabase on mount
   useEffect(() => {
     const fetchUnions = async () => {
+      // The relational query fetches data from union_metrics and joins the parent college_unions table
       const { data, error } = await supabase
         .from('union_metrics')
         .select(`
@@ -43,18 +44,22 @@ export default function HeadToHead() {
           college_unions ( union_name )
         `);
 
-      if (!error && data) {
+      if (error) {
+        console.error("Supabase Error:", error);
+      } else if (data) {
         const formattedData = data.map((item: any) => ({
           union_id: item.union_id,
+          // Supabase returns related tables as an object if it's a 1-to-1/Many-to-1 relationship
           name: item.college_unions?.union_name || "Unknown Union",
-          dawa: item.dawa_score,
-          adarsham: item.adarsham_score,
-          sargam: item.sargam_score,
-          publishing: item.publishing_score,
-          total: item.total_score,
+          dawa: item.dawa_score || 0,
+          adarsham: item.adarsham_score || 0,
+          sargam: item.sargam_score || 0,
+          publishing: item.publishing_score || 0,
+          total: item.total_score || 0,
         }));
         setUnionsList(formattedData);
       }
+      setIsLoading(false);
     };
 
     fetchUnions();
@@ -86,119 +91,126 @@ export default function HeadToHead() {
           </h2>
         </div>
 
-        {/* Interactive Search UI (Light Theme) */}
-        <div className="rounded-[2.5rem] border border-line bg-white p-6 sm:p-10 shadow-ocean-md">
-          <div className="flex flex-col md:flex-row items-center gap-6">
-            
-            {/* TEAM ALPHA */}
-            <div className="relative w-full flex-1">
-              <div className="mb-3 flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-widest text-ink-500">
-                <ShieldCheck size={16} className="text-emerald-500" />
-                Team Alpha
-              </div>
-              
-              <div 
-                className={`relative flex w-full cursor-pointer items-center justify-between rounded-2xl border-2 px-6 py-5 transition-colors ${
-                  isDropdownA ? 'border-ocean-300 bg-ocean-50' : 'border-line bg-[#F8FAFC] hover:border-ocean-200'
-                }`}
-                onClick={() => setIsDropdownA(!isDropdownA)}
-              >
-                <span className={`text-sm font-black uppercase tracking-widest ${unionA ? 'text-ocean-950' : 'text-ink-400'}`}>
-                  {unionA ? unionA.name : "SELECT CHALLENGER..."}
-                </span>
-                <ChevronDown size={18} className="text-ink-400" />
-              </div>
-              
-              {/* Search Dropdown Alpha */}
-              {isDropdownA && (
-                <div className="absolute top-[calc(100%+8px)] left-0 z-50 w-full rounded-2xl border border-line bg-white p-2 shadow-xl" onMouseLeave={() => setIsDropdownA(false)}>
-                  <div className="mb-2 flex items-center gap-3 rounded-xl bg-[#F8FAFC] px-4 py-3 border border-line">
-                    <Search size={16} className="text-ink-400" />
-                    <input 
-                      type="text" 
-                      placeholder="Search unions..." 
-                      className="w-full bg-transparent text-sm font-bold text-ocean-950 outline-none placeholder:text-ink-400"
-                      value={searchA}
-                      onChange={(e) => setSearchA(e.target.value)}
-                    />
-                  </div>
-                  <div className="flex max-h-48 flex-col gap-1 overflow-y-auto custom-scrollbar">
-                    {unionsList.filter(u => u.name.toLowerCase().includes(searchA.toLowerCase())).map(u => (
-                      <div 
-                        key={u.union_id} 
-                        className="cursor-pointer rounded-xl px-4 py-3 text-xs font-extrabold text-ink-600 hover:bg-ocean-50 hover:text-ocean-950"
-                        onClick={() => { setUnionA(u); setIsDropdownA(false); }}
-                      >
-                        {u.name}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+        {/* Interactive Search UI */}
+        <div className="rounded-[2.5rem] border border-line bg-white p-6 sm:p-10 shadow-[0_15px_40px_-15px_rgba(0,0,0,0.05)]">
+          
+          {isLoading ? (
+            <div className="flex h-32 w-full items-center justify-center gap-3 text-ink-400">
+              <Loader2 className="h-6 w-6 animate-spin text-ocean-500" />
+              <span className="text-sm font-bold uppercase tracking-widest">Syncing Database...</span>
             </div>
-
-            {/* VS BADGE */}
-            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full border border-line bg-[#F8FAFC] text-ink-400 mt-6 md:mt-0 shadow-sm">
-              <Swords size={20} strokeWidth={2.5} />
-            </div>
-
-            {/* TEAM BRAVO */}
-            <div className="relative w-full flex-1">
-              <div className="mb-3 flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-widest text-ink-500">
-                <ShieldCheck size={16} className="text-emerald-500" />
-                Team Bravo
-              </div>
+          ) : (
+            <div className="flex flex-col md:flex-row items-center gap-6">
               
-              {!unionA ? (
-                <div className="relative flex w-full items-center justify-between rounded-2xl border-2 border-line/50 bg-[#F8FAFC]/50 px-6 py-5 opacity-60">
-                  <span className="text-sm font-black uppercase tracking-widest text-ink-300">
-                    LOCKED
-                  </span>
-                  <Lock size={18} className="text-ink-300" />
+              {/* TEAM ALPHA */}
+              <div className="relative w-full flex-1">
+                <div className="mb-3 flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-widest text-ink-500">
+                  <ShieldCheck size={16} className="text-emerald-500" />
+                  Team Alpha
                 </div>
-              ) : (
+                
                 <div 
                   className={`relative flex w-full cursor-pointer items-center justify-between rounded-2xl border-2 px-6 py-5 transition-colors ${
-                    isDropdownB ? 'border-ocean-300 bg-ocean-50' : 'border-line bg-[#F8FAFC] hover:border-ocean-200'
+                    isDropdownA ? 'border-ocean-300 bg-ocean-50' : 'border-line bg-[#F8FAFC] hover:border-ocean-200'
                   }`}
-                  onClick={() => setIsDropdownB(!isDropdownB)}
+                  onClick={() => setIsDropdownA(!isDropdownA)}
                 >
-                  <span className={`text-sm font-black uppercase tracking-widest ${unionB ? 'text-ocean-950' : 'text-ink-400'}`}>
-                    {unionB ? unionB.name : "SELECT CHALLENGER..."}
+                  <span className={`text-sm font-black uppercase tracking-widest ${unionA ? 'text-ocean-950' : 'text-ink-400'}`}>
+                    {unionA ? unionA.name : "SELECT CHALLENGER..."}
                   </span>
                   <ChevronDown size={18} className="text-ink-400" />
                 </div>
-              )}
+                
+                {/* Search Dropdown Alpha */}
+                {isDropdownA && (
+                  <div className="absolute top-[calc(100%+8px)] left-0 z-50 w-full rounded-2xl border border-line bg-white p-2 shadow-xl" onMouseLeave={() => setIsDropdownA(false)}>
+                    <div className="mb-2 flex items-center gap-3 rounded-xl bg-[#F8FAFC] px-4 py-3 border border-line">
+                      <Search size={16} className="text-ink-400" />
+                      <input 
+                        type="text" 
+                        placeholder="Search unions..." 
+                        className="w-full bg-transparent text-sm font-bold text-ocean-950 outline-none placeholder:text-ink-400"
+                        value={searchA}
+                        onChange={(e) => setSearchA(e.target.value)}
+                      />
+                    </div>
+                    <div className="flex max-h-48 flex-col gap-1 overflow-y-auto custom-scrollbar">
+                      {unionsList.filter(u => u.name.toLowerCase().includes(searchA.toLowerCase())).map(u => (
+                        <div 
+                          key={u.union_id} 
+                          className="cursor-pointer rounded-xl px-4 py-3 text-xs font-extrabold text-ink-600 hover:bg-ocean-50 hover:text-ocean-950"
+                          onClick={() => { setUnionA(u); setIsDropdownA(false); }}
+                        >
+                          {u.name}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
 
-              {/* Search Dropdown Bravo */}
-              {isDropdownB && unionA && (
-                <div className="absolute top-[calc(100%+8px)] left-0 z-50 w-full rounded-2xl border border-line bg-white p-2 shadow-xl" onMouseLeave={() => setIsDropdownB(false)}>
-                  <div className="mb-2 flex items-center gap-3 rounded-xl bg-[#F8FAFC] px-4 py-3 border border-line">
-                    <Search size={16} className="text-ink-400" />
-                    <input 
-                      type="text" 
-                      placeholder="Search unions..." 
-                      className="w-full bg-transparent text-sm font-bold text-ocean-950 outline-none placeholder:text-ink-400"
-                      value={searchB}
-                      onChange={(e) => setSearchB(e.target.value)}
-                    />
-                  </div>
-                  <div className="flex max-h-48 flex-col gap-1 overflow-y-auto custom-scrollbar">
-                    {unionsList.filter(u => u.name.toLowerCase().includes(searchB.toLowerCase()) && u.union_id !== unionA.union_id).map(u => (
-                      <div 
-                        key={u.union_id} 
-                        className="cursor-pointer rounded-xl px-4 py-3 text-xs font-extrabold text-ink-600 hover:bg-ocean-50 hover:text-ocean-950"
-                        onClick={() => { setUnionB(u); setIsDropdownB(false); }}
-                      >
-                        {u.name}
-                      </div>
-                    ))}
-                  </div>
+              {/* VS BADGE */}
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full border border-line bg-[#F8FAFC] text-ink-400 mt-6 md:mt-0 shadow-sm">
+                <Swords size={20} strokeWidth={2.5} />
+              </div>
+
+              {/* TEAM BRAVO */}
+              <div className="relative w-full flex-1">
+                <div className="mb-3 flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-widest text-ink-500">
+                  <ShieldCheck size={16} className="text-emerald-500" />
+                  Team Bravo
                 </div>
-              )}
-            </div>
+                
+                {!unionA ? (
+                  <div className="relative flex w-full items-center justify-between rounded-2xl border-2 border-line/50 bg-[#F8FAFC]/50 px-6 py-5 opacity-60">
+                    <span className="text-sm font-black uppercase tracking-widest text-ink-300">
+                      LOCKED
+                    </span>
+                    <Lock size={18} className="text-ink-300" />
+                  </div>
+                ) : (
+                  <div 
+                    className={`relative flex w-full cursor-pointer items-center justify-between rounded-2xl border-2 px-6 py-5 transition-colors ${
+                      isDropdownB ? 'border-ocean-300 bg-ocean-50' : 'border-line bg-[#F8FAFC] hover:border-ocean-200'
+                    }`}
+                    onClick={() => setIsDropdownB(!isDropdownB)}
+                  >
+                    <span className={`text-sm font-black uppercase tracking-widest ${unionB ? 'text-ocean-950' : 'text-ink-400'}`}>
+                      {unionB ? unionB.name : "SELECT CHALLENGER..."}
+                    </span>
+                    <ChevronDown size={18} className="text-ink-400" />
+                  </div>
+                )}
 
-          </div>
+                {/* Search Dropdown Bravo */}
+                {isDropdownB && unionA && (
+                  <div className="absolute top-[calc(100%+8px)] left-0 z-50 w-full rounded-2xl border border-line bg-white p-2 shadow-xl" onMouseLeave={() => setIsDropdownB(false)}>
+                    <div className="mb-2 flex items-center gap-3 rounded-xl bg-[#F8FAFC] px-4 py-3 border border-line">
+                      <Search size={16} className="text-ink-400" />
+                      <input 
+                        type="text" 
+                        placeholder="Search unions..." 
+                        className="w-full bg-transparent text-sm font-bold text-ocean-950 outline-none placeholder:text-ink-400"
+                        value={searchB}
+                        onChange={(e) => setSearchB(e.target.value)}
+                      />
+                    </div>
+                    <div className="flex max-h-48 flex-col gap-1 overflow-y-auto custom-scrollbar">
+                      {unionsList.filter(u => u.name.toLowerCase().includes(searchB.toLowerCase()) && u.union_id !== unionA.union_id).map(u => (
+                        <div 
+                          key={u.union_id} 
+                          className="cursor-pointer rounded-xl px-4 py-3 text-xs font-extrabold text-ink-600 hover:bg-ocean-50 hover:text-ocean-950"
+                          onClick={() => { setUnionB(u); setIsDropdownB(false); }}
+                        >
+                          {u.name}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* RESULTS CHART (Reveals when both unions are selected) */}
           {unionA && unionB && (
@@ -212,7 +224,7 @@ export default function HeadToHead() {
                 ].map((stat) => {
                   const scoreA = unionA[stat.key as keyof typeof unionA] as number;
                   const scoreB = unionB[stat.key as keyof typeof unionB] as number;
-                  const maxScore = 100;
+                  const maxScore = Math.max(100, scoreA, scoreB); // Dynamically scales if points exceed 100
                   const winA = scoreA >= scoreB;
                   const winB = scoreB >= scoreA;
 
