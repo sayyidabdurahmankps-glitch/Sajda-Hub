@@ -62,7 +62,7 @@ export default function LoginPage() {
             <div className="mb-6 flex h-20 w-20 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-white/5 shadow-inner">
               {/* Note: Ensure /icon.png exists in your public folder to fix the broken image */}
               <Image 
-                src="sajda-logo.png" 
+                src="/sajda-logo.png" 
                 alt="SAJDA Logo" 
                 width={48} 
                 height={48} 
