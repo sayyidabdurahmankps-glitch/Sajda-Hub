@@ -1,4 +1,3 @@
-
 @import "tailwindcss";
 
 /* =========================================================
@@ -20,42 +19,41 @@
 
 @theme {
   /*
-    Medium Green Palette
-    (Vibrant and balanced, avoiding overly dark or pale extremes)
+    LILAC PALETTE
+    Mapped to your existing 'ocean' variables so your UI updates instantly!
   */
+  --color-ocean-50: #fbf9fc;
+  --color-ocean-100: #f4eef7;
+  --color-ocean-200: #e7daed;
+  --color-ocean-300: #d4bfdf;
+  --color-ocean-400: #bb9acb;
+  --color-ocean-500: #a173b4; /* Base Lilac */
+  --color-ocean-600: #88599b;
+  --color-ocean-700: #714681;
+  --color-ocean-800: #5d3a69;
+  --color-ocean-900: #4e3257;
+  --color-ocean-950: #2c1a32;
 
-  --color-ocean-50: #f0fdf4;
-  --color-ocean-100: #dcfce7;
-  --color-ocean-200: #bbf7d0;
-  --color-ocean-300: #86efac;
-  --color-ocean-400: #4ade80;
-  --color-ocean-500: #22c55e;
-  --color-ocean-600: #16a34a;
-  --color-ocean-700: #15803d;
-  --color-ocean-800: #166534;
-  --color-ocean-900: #14532d;
-  --color-ocean-950: #052e16;
+  /* Updated Sage to match the deep Lilac tone */
+  --color-sage-950: #2c1a32;
 
-  /* Updated Sage for consistency if still used in the Navbar */
-  --color-sage-950: #166534;
-
-  /* Ink Palette (Text) */
-  --color-ink-500: #64748b;
-  --color-ink-600: #475569;
-  --color-ink-900: #0f172a;
-  --color-ink-950: #0b1726;
+  /* Ink Palette (Text) - Warmed up slightly to complement the Cream */
+  --color-ink-500: #716f7a;
+  --color-ink-600: #55535e;
+  --color-ink-900: #26242c;
+  --color-ink-950: #1a181e;
 
   /* Structural Colors */
-  --color-line: #e2e8f0;
-  --color-line-strong: #cbd5e1;
+  --color-line: #e8e3ec;
+  --color-line-strong: #d3ccdb;
 
-  /* Custom Shadows tinted to the new medium green */
-  --shadow-ocean-sm: 0 4px 20px 0 rgba(22, 163, 74, 0.08);
-  --shadow-ocean-md: 0 12px 30px 0 rgba(22, 163, 74, 0.15);
+  /* Custom Shadows tinted to the new Lilac */
+  --shadow-ocean-sm: 0 4px 20px 0 rgba(161, 115, 180, 0.08);
+  --shadow-ocean-md: 0 12px 30px 0 rgba(161, 115, 180, 0.15);
 }
 
 /* =========================================================
-   GLOBAL TYPOGRAPHY
+   GLOBAL TYPOGRAPHY & BACKGROUND
 ========================================================= */
 
 html,
@@ -69,7 +67,8 @@ body {
     "Segoe UI",
     sans-serif;
 
-  background-color: #f8fafc;
+  /* The new Base Cream background */
+  background-color: #fdfcf7;
   color: var(--color-ink-950);
 }
 
@@ -114,4 +113,3 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
-
