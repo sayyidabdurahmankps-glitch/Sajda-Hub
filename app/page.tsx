@@ -463,7 +463,7 @@ export default function HomePage() {
                 },
                 {
                   icon: CalendarDays,
-                  value: "∞",
+                  value: "INFINTE",
                   title: "Academic Years",
                   text: "A reusable yearly architecture",
                 },
